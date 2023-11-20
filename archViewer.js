@@ -61,46 +61,46 @@ viewerVars.postToElogURL = "../../../postToElog";
 viewerVars.siteSupportsPostToElog = false;
 
 $.get("../../../site_params.json")
-.done(function(site_params){
-    viewerVars.siteSupportsPostToElog = _.get(site_params, "siteSupportsPostToElog", false);
-})
+	.done(function (site_params) {
+		viewerVars.siteSupportsPostToElog = _.get(site_params, "siteSupportsPostToElog", false);
+	})
 
 
 
 // Google finance like list of time windows..
 viewerVars.selectorOptions = {
-		buttons: [{step: 'second',  stepmode: 'backward', count: 30, label: '30s'   },
-		          {step: 'minute',  stepmode: 'backward', count: 1,  label: '1m'    },
-		          {step: 'minute',  stepmode: 'backward', count: 5,  label: '5m'    },
-		          {step: 'minute',  stepmode: 'backward', count: 15, label: '15m'   },
-		          {step: 'minute',  stepmode: 'backward', count: 30, label: '30m'   },
-		          {step: 'hour',    stepmode: 'backward', count: 1,  label: '1h'    },
-		          {step: 'hour',    stepmode: 'backward', count: 4,  label: '4h'    },
-		          {step: 'hour',    stepmode: 'backward', count: 8,  label: '8h'    },
-		          {step: 'day',     stepmode: 'backward', count: 1,  label: '1d'    },
-		          {step: 'day',     stepmode: 'backward', count: 2,  label: '2d'    },
-		          {step: 'day',     stepmode: 'backward', count: 7,  label: '1w'    },
-		          {step: 'day',     stepmode: 'backward', count: 14, label: '2w'    },
-		          {step: 'month',   stepmode: 'backward', count: 1,  label: '1M'    },
-		          {step: 'month',   stepmode: 'backward', count: 6,  label: '6M'    },
-		          {step: 'year',    stepmode: 'backward', count: 1,  label: '1Y'    },
-		          {step: 'year',    stepmode: 'todate',   count: 1,  label: 'YTD'   },
-		          {step: 'minute',  stepmode: 'forward',  count: 7,  label: 'Live'  },
-		          ]
+	buttons: [{step: 'second', stepmode: 'backward', count: 30, label: '30s'},
+		{step: 'minute', stepmode: 'backward', count: 1, label: '1m'},
+		{step: 'minute', stepmode: 'backward', count: 5, label: '5m'},
+		{step: 'minute', stepmode: 'backward', count: 15, label: '15m'},
+		{step: 'minute', stepmode: 'backward', count: 30, label: '30m'},
+		{step: 'hour', stepmode: 'backward', count: 1, label: '1h'},
+		{step: 'hour', stepmode: 'backward', count: 4, label: '4h'},
+		{step: 'hour', stepmode: 'backward', count: 8, label: '8h'},
+		{step: 'day', stepmode: 'backward', count: 1, label: '1d'},
+		{step: 'day', stepmode: 'backward', count: 2, label: '2d'},
+		{step: 'day', stepmode: 'backward', count: 7, label: '1w'},
+		{step: 'day', stepmode: 'backward', count: 14, label: '2w'},
+		{step: 'month', stepmode: 'backward', count: 1, label: '1M'},
+		{step: 'month', stepmode: 'backward', count: 6, label: '6M'},
+		{step: 'year', stepmode: 'backward', count: 1, label: '1Y'},
+		{step: 'year', stepmode: 'todate', count: 1, label: 'YTD'},
+		{step: 'minute', stepmode: 'forward', count: 7, label: 'Live'},
+	]
 };
 
 if (window.screen.availHeight > window.screen.availWidth) {
 	viewerVars.selectorOptions = {
 		buttons: [
-			  {step: 'minute',  stepmode: 'forward',  count: 7,  label: 'Live'  },
-			  {step: 'minute',  stepmode: 'backward', count: 1,  label: '1m'    },
-			  {step: 'hour',    stepmode: 'backward', count: 1,  label: '1h'    },
-			  {step: 'day',     stepmode: 'backward', count: 1,  label: '1d'    },
-			  {step: 'day',     stepmode: 'backward', count: 7,  label: '1w'    },
-			  {step: 'month',   stepmode: 'backward', count: 1,  label: '1M'    },
-			  {step: 'year',    stepmode: 'backward', count: 1,  label: '1Y'    },
-			  {step: 'year',    stepmode: 'todate',   count: 1,  label: 'YTD'   },
-			  ]
+			{step: 'minute', stepmode: 'forward', count: 7, label: 'Live'},
+			{step: 'minute', stepmode: 'backward', count: 1, label: '1m'},
+			{step: 'hour', stepmode: 'backward', count: 1, label: '1h'},
+			{step: 'day', stepmode: 'backward', count: 1, label: '1d'},
+			{step: 'day', stepmode: 'backward', count: 7, label: '1w'},
+			{step: 'month', stepmode: 'backward', count: 1, label: '1M'},
+			{step: 'year', stepmode: 'backward', count: 1, label: '1Y'},
+			{step: 'year', stepmode: 'todate', count: 1, label: 'YTD'},
+		]
 	};
 }
 
@@ -108,8 +108,8 @@ if (window.screen.availHeight > window.screen.availWidth) {
 viewerVars.relativeDateRegex = /^([-+]{0,1})(\d+)([smhdwMQy]{1})$/; // Get these from moment.js Manipulate shorthand.
 
 function parseRelativeDate(relDate) {
-    var parts = viewerVars.relativeDateRegex.exec(relDate);
-    return (parts[1] != "-") ? moment().add(parseInt(parts[2]), parts[3]).toDate() : moment().subtract(parseInt(parts[2]), parts[3]).toDate();
+	var parts = viewerVars.relativeDateRegex.exec(relDate);
+	return (parts[1] != "-") ? moment().add(parseInt(parts[2]), parts[3]).toDate() : moment().subtract(parseInt(parts[2]), parts[3]).toDate();
 }
 
 // You can pass in parameters to the viewer.
@@ -126,26 +126,32 @@ function parseURLParameters() {
 			var parts = queries[i].split('='), name = parts[0], val =  decodeURIComponent(parts[1]);
 			// console.log("Name="+name+"Val="+val);
 			switch(name) {
-			case "pv":
-				viewerVars.pvs.push(val); viewerVars.pvData[val] = {}; break;
-			case "from":
-                viewerVars.start = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val); break
-			case "to":
-                viewerVars.end = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val); break
-            case "yaxes":
-				viewerVars.egu_yaxis_specs = $.parseJSON(decodeURIComponent(val)); break;
-            case "binSize":
-                viewerVars.binSize = parseInt(val);
-                viewerVars.userFixedBinSize = true;
-            case "replaceNA":
-                viewerVars.replaceNA = val === 'true' ? true : false;
-			default:
-				console.log("Unsupported parameter " + name); break;
+				case "pv":
+					viewerVars.pvs.push(val);
+					viewerVars.pvData[val] = {};
+					break;
+				case "from":
+					viewerVars.start = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
+					break
+				case "to":
+					viewerVars.end = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
+					break
+				case "yaxes":
+					viewerVars.egu_yaxis_specs = $.parseJSON(decodeURIComponent(val));
+					break;
+				case "binSize":
+					viewerVars.binSize = parseInt(val);
+					viewerVars.userFixedBinSize = true;
+				case "replaceNA":
+					viewerVars.replaceNA = val === 'true' ? true : false;
+				default:
+					console.log("Unsupported parameter " + name);
+					break;
 			}
 		}
 	}
 	// QueryStart and QueryEnd are what we actually send to the server....
-    determineBinSize();
+	determineBinSize();
 	viewerVars.queryStart = viewerVars.start;
 	viewerVars.queryEnd = viewerVars.end;
 }
@@ -178,21 +184,27 @@ function getLayoutChangesForMultipleYAxes(layout) {
 		}
 		var axs = viewerVars.pvData[pvName].axis;
 		switch(axs) {
-		case 'y1':
-			break; // Do nothing for the first y axis...
-		default:
-			if(!(viewerVars.y_short_2_long[axs] in layout) && !(viewerVars.y_short_2_long[axs] in layoutChanges)) {
-				layoutChanges[viewerVars.y_short_2_long[axs]] = _.assign({ title: viewerVars.axis2egu[axs], overlaying: 'y', side: 'right'}, getYAxisSpecification(pvName));
-				if(axs in viewerVars.yaxis_layout_changes) {
-					layoutChanges[viewerVars.y_short_2_long[axs]].position = viewerVars.yaxis_layout_changes[axs].position;
-					if(!('xaxis' in layoutChanges)) { layoutChanges.xaxis = {}; }
-					layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
-					layoutChanges.xaxis.autorange = false;
-					layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
-					layoutChanges.xaxis.domain = viewerVars.yaxis_layout_changes[axs].domain;
+			case 'y1':
+				break; // Do nothing for the first y axis...
+			default:
+				if (!(viewerVars.y_short_2_long[axs] in layout) && !(viewerVars.y_short_2_long[axs] in layoutChanges)) {
+					layoutChanges[viewerVars.y_short_2_long[axs]] = _.assign({
+						title: viewerVars.axis2egu[axs],
+						overlaying: 'y',
+						side: 'right'
+					}, getYAxisSpecification(pvName));
+					if (axs in viewerVars.yaxis_layout_changes) {
+						layoutChanges[viewerVars.y_short_2_long[axs]].position = viewerVars.yaxis_layout_changes[axs].position;
+						if (!('xaxis' in layoutChanges)) {
+							layoutChanges.xaxis = {};
+						}
+						layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
+						layoutChanges.xaxis.autorange = false;
+						layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
+						layoutChanges.xaxis.domain = viewerVars.yaxis_layout_changes[axs].domain;
+					}
 				}
-			}
-			break;
+				break;
 		}
 	}
 	return layoutChanges;
@@ -200,17 +212,17 @@ function getLayoutChangesForMultipleYAxes(layout) {
 
 // Get the range specifier for the y axes
 function getYAxisSpecification(pvName) {
-    var egu = viewerVars.pvData[pvName].egu;
-    return _.get(viewerVars.egu_yaxis_specs, egu, { autorange: true })
+	var egu = viewerVars.pvData[pvName].egu;
+	return _.get(viewerVars.egu_yaxis_specs, egu, {autorange: true})
 }
 
 function getEstimatedRawSamples() {
-    var maxSamples = 0;
-    for(i = 0; i < viewerVars.pvs.length; i++) {
-        pvName = viewerVars.pvs[i];
-        maxSamples = Math.max(maxSamples, viewerVars.pvData[pvName].vals.length*viewerVars.binSize);
-    }
-    return maxSamples;
+	var maxSamples = 0;
+	for (i = 0; i < viewerVars.pvs.length; i++) {
+		pvName = viewerVars.pvs[i];
+		maxSamples = Math.max(maxSamples, viewerVars.pvData[pvName].vals.length * viewerVars.binSize);
+	}
+	return maxSamples;
 }
 
 
@@ -248,8 +260,8 @@ function processChangesOnXAxis(eventdata) {
 	var previousStart = viewerVars.start;
 	var previousEnd = viewerVars.end;
 	if (('xaxis.range[0]' in eventdata && 'xaxis.range[1]' in eventdata)
-			|| ('xaxis2.range[0]' in eventdata && 'xaxis2.range[1]' in eventdata)
-			) {
+		|| ('xaxis2.range[0]' in eventdata && 'xaxis2.range[1]' in eventdata)
+	) {
 		if('xaxis.range[0]' in eventdata && 'xaxis.range[1]' in eventdata) {
 			viewerVars.start = moment(eventdata['xaxis.range[0]']).toDate();
 			viewerVars.end = moment(eventdata['xaxis.range[1]']).toDate();
@@ -316,14 +328,17 @@ function processChangesOnXAxis(eventdata) {
 // Get the data from the server and add to the plot. This could be considered the main function in some sense.
 // At a high level, we get the data, map the EGU to one of the yaxes and then based on the type of xaxischange call various plotly operations.
 function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
-	if(viewerVars.pvs.length == 0) { return; }
+	if (viewerVars.pvs.length === 0) {
+		return;
+	}
 
-	var pvsToFetchData = (xAxisChangeType == "AddNewTrace") ? newTracePVNames : viewerVars.pvs;
+	var pvsToFetchData = (xAxisChangeType === "AddNewTrace") ? newTracePVNames : viewerVars.pvs;
 	var pvDataPromises = _.times(pvsToFetchData.length, function() { return new $.Deferred()}), datas = new Array(pvsToFetchData.length);
-	_.each(pvsToFetchData, function(pvName, i) {
+	_.each(pvsToFetchData, function (unsafePVName, i) {
 		var queryString = "";
+		var pvName = encodeURIComponent(unsafePVName);
 		if(viewerVars.binSize > 0) {
-			if (viewerVars.currentBinningOperator == "raw") {
+			if (viewerVars.currentBinningOperator === "raw") {
 				queryString = "pv="  + pvName;
 			} else {
 				queryString = "pv=" + viewerVars.currentBinningOperator + "_" + viewerVars.binSize + "(" + pvName + ")";
@@ -338,18 +353,31 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 			console.log("Starting binned data retrieval from " + binnedQueryStart.toISOString());
 			startEndQs = "&from="+binnedQueryStart.toISOString()+"&to="+viewerVars.queryEnd.toISOString();
 		}
-		if (!('DESC' in viewerVars.pvData[pvName])) { startEndQs += "&fetchLatestMetadata=true"}
+		if (!('DESC' in viewerVars.pvData[unsafePVName])) {
+			startEndQs += "&fetchLatestMetadata=true"
+		}
 
 		var pvDataUrl = viewerVars.serverURL + "/getData.qw?" + queryString + startEndQs;
 		console.log(pvDataUrl);
-		$.getJSON(pvDataUrl).done(function(d0){datas[i] = d0; pvDataPromises[i].resolve(true)}).fail(function(jqXHR, textStatus, errorThrown){console.log("Server side failure getting data for " + pvName + "\n" + jqXHR.responseText); datas[i] = {}; pvDataPromises[i].resolve(false)});
+		$.getJSON(pvDataUrl).done(function (d0) {
+			datas[i] = d0;
+			pvDataPromises[i].resolve(true)
+		}).fail(function (jqXHR, textStatus, errorThrown) {
+			console.log("Server side failure getting data for " + unsafePVName + "\n" + jqXHR.responseText);
+			datas[i] = {};
+			pvDataPromises[i].resolve(false)
+		});
 	})
 
 	$.when.apply($, pvDataPromises).done(function () {
 		// The done is called with the results of the .getJSON's for all the submitted URLs. Use the Javascript arguments object to unpack the data.
 		for(let i = 0, l = arguments.length; i < l; i++) {
-            if(!arguments[i]) {
-                new Noty({type: "error", timeout: 5000, text: "Failure getting data for PV " + pvsToFetchData[i]}).show();
+			if (!arguments[i]) {
+				new Noty({
+					type: "error",
+					timeout: 5000,
+					text: "Failure getting data for PV " + pvsToFetchData[i]
+				}).show();
 				continue;
 			}
 			let data = datas[i][0];
@@ -375,7 +403,11 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 					}
 				}
 				if(!('axis' in viewerVars.pvData[pvName])) {
-                    new Noty({type: "error", timeout: 5000, text: "Cannot map " + pvName + " to one of the available axes. Not displaying this PV."}).show();
+					new Noty({
+						type: "error",
+						timeout: 5000,
+						text: "Cannot map " + pvName + " to one of the available axes. Not displaying this PV."
+					}).show();
 					continue;
 				}
 			}
@@ -397,61 +429,92 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 
 			// var XAxis_Change_Type = {"NewPlot":1, "ReplaceTraces":2, "LeftPan":3, "RightPan":4};
 			switch(xAxisChangeType) {
-			case "LeftPan":
-				var previousDataSetFirstSampleMillis = myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].getTime();
-				console.log(data['data'].length + " samples from the server " + myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].toString());
+				case "LeftPan":
+					var previousDataSetFirstSampleMillis = myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].getTime();
+					console.log(data['data'].length + " samples from the server " + myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].toString());
 
-				var secs = data['data'].filter(function(sample){ return (sample['millis']) < previousDataSetFirstSampleMillis; }).map(function(sample) { return new Date(sample['millis']); });
-				var vals = data['data'].filter(function(sample){ return (sample['millis']) < previousDataSetFirstSampleMillis; }).map(function(sample) { return sample['val']; });
-				viewerVars.pvData[pvName].update = { x: secs, y: vals };
-				console.log(secs.length + " after processing");
-				break;
-			case "RightPan":
-				var previousDataSetLastSampleMillis = myDiv.data[viewerVars.pvData[pvName].traceIndex].x.slice(-1)[0].getTime();
-				var secs = data['data'].filter(function(sample){ return (sample['millis']) > previousDataSetLastSampleMillis; }).map(function(sample) { return new Date(sample['millis']); });
-				var vals = data['data'].filter(function(sample){ return (sample['millis']) > previousDataSetLastSampleMillis; }).map(function(sample) { return sample['val']; });
-				viewerVars.pvData[pvName].update = { x: secs, y: vals };
-				break;
-			case "ReplaceTraces":
-			case "NewPlot":
-			case "AddNewTrace":
-			default:
-				viewerVars.pvData[pvName].secs = data['data'].map(function(sample) { return new Date(sample['millis']); });
-			    viewerVars.pvData[pvName].vals = data['data'].map(function(sample) { return sample['val']; });
-                console.log("Add a fake point at " + moment(viewerVars.queryEnd).toDate());
-                viewerVars.pvData[pvName].secs.push(moment(viewerVars.queryEnd).toDate()); viewerVars.pvData[pvName].vals.push(viewerVars.pvData[pvName].vals.slice(-1)[0]);
-			    viewerVars.pvData[pvName].trace = {
-					x: viewerVars.pvData[pvName].secs,
-					y: viewerVars.pvData[pvName].vals,
-					name: pvName,
-					hoverlabel: {namelength :-1},
-					type: 'scatter',
-					mode: "lines",
-					line: {shape: 'hv'},
-					yaxis: viewerVars.pvData[pvName].axis
-			    };
-			    if (viewerVars.binSize > 0 && viewerVars.currentBinningOperator.startsWith('errorbar')) {
-			    	viewerVars.pvData[pvName].stdzVals = data['data'].map(function(sample) { return sample['fields']['stdz']; });
-			    	viewerVars.pvData[pvName].trace.error_y = {type: 'data', array: viewerVars.pvData[pvName].stdzVals, visible: true};
-			    }
+					var secs = data['data'].filter(function (sample) {
+						return (sample['millis']) < previousDataSetFirstSampleMillis;
+					}).map(function (sample) {
+						return new Date(sample['millis']);
+					});
+					var vals = data['data'].filter(function (sample) {
+						return (sample['millis']) < previousDataSetFirstSampleMillis;
+					}).map(function (sample) {
+						return sample['val'];
+					});
+					viewerVars.pvData[pvName].update = {x: secs, y: vals};
+					console.log(secs.length + " after processing");
+					break;
+				case "RightPan":
+					var previousDataSetLastSampleMillis = myDiv.data[viewerVars.pvData[pvName].traceIndex].x.slice(-1)[0].getTime();
+					var secs = data['data'].filter(function (sample) {
+						return (sample['millis']) > previousDataSetLastSampleMillis;
+					}).map(function (sample) {
+						return new Date(sample['millis']);
+					});
+					var vals = data['data'].filter(function (sample) {
+						return (sample['millis']) > previousDataSetLastSampleMillis;
+					}).map(function (sample) {
+						return sample['val'];
+					});
+					viewerVars.pvData[pvName].update = {x: secs, y: vals};
+					break;
+				case "ReplaceTraces":
+				case "NewPlot":
+				case "AddNewTrace":
+				default:
+					viewerVars.pvData[pvName].secs = data['data'].map(function (sample) {
+						return new Date(sample['millis']);
+					});
+					viewerVars.pvData[pvName].vals = data['data'].map(function (sample) {
+						return sample['val'];
+					});
+					console.log("Add a fake point at " + moment(viewerVars.queryEnd).toDate());
+					viewerVars.pvData[pvName].secs.push(moment(viewerVars.queryEnd).toDate());
+					viewerVars.pvData[pvName].vals.push(viewerVars.pvData[pvName].vals.slice(-1)[0]);
+					viewerVars.pvData[pvName].trace = {
+						x: viewerVars.pvData[pvName].secs,
+						y: viewerVars.pvData[pvName].vals,
+						name: pvName,
+						hoverlabel: {namelength: -1},
+						type: 'scatter',
+						mode: "lines",
+						line: {shape: 'hv'},
+						yaxis: viewerVars.pvData[pvName].axis
+					};
+					if (viewerVars.binSize > 0 && viewerVars.currentBinningOperator.startsWith('errorbar')) {
+						viewerVars.pvData[pvName].stdzVals = data['data'].map(function (sample) {
+							return sample['fields']['stdz'];
+						});
+						viewerVars.pvData[pvName].trace.error_y = {
+							type: 'data',
+							array: viewerVars.pvData[pvName].stdzVals,
+							visible: true
+						};
+					}
 
-			    break;
+					break;
 			} // Close the switch
 		}
 
 		if(!('layout' in myDiv)) { // This means we are creating the plotly object for the first time...
 			var layout = {
-					title: 'EPICS Archiver Appliance Viewer',
-                    width: window.innerWidth,
-					height: window.innerHeight*0.95,
-					showlegend: true,
-					legend: {x: 0, y: 1},
-					xaxis: {type: 'date', rangeselector: viewerVars.selectorOptions,
-						autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()],
-						title: getXAxisTitle(),
-						titlefont: {color: '#7f7f7f', }
-					},
-					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0]))
+				title: 'EPICS Archiver Appliance Viewer',
+				width: window.innerWidth,
+				height: window.innerHeight * 0.95,
+				showlegend: true,
+				legend: {x: 0, y: 1},
+				xaxis: {
+					type: 'date', rangeselector: viewerVars.selectorOptions,
+					autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()],
+					title: getXAxisTitle(),
+					titlefont: {color: '#7f7f7f',}
+				},
+				yaxis: _.assign({
+					title: viewerVars.axis2egu['y1'],
+					exponentformat: 'e'
+				}, getYAxisSpecification(viewerVars.pvs[0]))
 			};
 			var layoutChanges = getLayoutChangesForMultipleYAxes(layout);
 			$.extend(true, layout, layoutChanges);
@@ -480,45 +543,48 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 				newTraceIndices.push(viewerVars.pvData[pvName].traceIndex);
 			}
 			switch(xAxisChangeType) {
-			case "LeftPan":
-				console.log("Left panning " + updateIndices);
-				Plotly.prependTraces(myDiv, {x: updateXs, y: updateYs}, updateIndices);
-				break;
-			case "RightPan":
-				console.log("Right panning " + updateIndices);
-				Plotly.extendTraces(myDiv, {x: updateXs, y: updateYs}, updateIndices);
-				break;
-			case "ReplaceTraces":
-				console.log("Replacing traces " + newTraceIndices);
-				updateXAxisTitle();
-				Plotly.deleteTraces(myDiv, newTraceIndices);
-				Plotly.addTraces(myDiv, newTraces).then(function() { reflectBinSizeColorOnLegend(); addToolTipsToTraceLegends(); });
-				break;
-			case "AddNewTrace":
-				var traces = computeTraceIndices();
-				for(var j = 0; j < newTracePVNames.length; j++) {
-					pvName = newTracePVNames[j];
-					if(!('trace' in viewerVars.pvData[pvName])) continue;
-					console.log("Checking to see if we need to add axis for " + pvName + " at " + viewerVars.pvData[pvName].traceIndex);
-					// Add the new axis if it does not exist in the layout already.
-					var longAxisName = viewerVars.y_short_2_long[viewerVars.pvData[pvName].axis];
-					if(!(longAxisName in myDiv.layout)) {
-						var layoutChanges = getLayoutChangesForMultipleYAxes(myDiv.layout);
-						Plotly.relayout(myDiv, layoutChanges)
-							.then(Plotly.addTraces(myDiv, viewerVars.pvData[pvName].trace, viewerVars.pvData[pvName].traceIndex))
-							.then(addToolTipsToTraceLegends());
-					} else {
-						Plotly.addTraces(myDiv, viewerVars.pvData[pvName].trace, viewerVars.pvData[pvName].traceIndex)
-						.then(addToolTipsToTraceLegends);
+				case "LeftPan":
+					console.log("Left panning " + updateIndices);
+					Plotly.prependTraces(myDiv, {x: updateXs, y: updateYs}, updateIndices);
+					break;
+				case "RightPan":
+					console.log("Right panning " + updateIndices);
+					Plotly.extendTraces(myDiv, {x: updateXs, y: updateYs}, updateIndices);
+					break;
+				case "ReplaceTraces":
+					console.log("Replacing traces " + newTraceIndices);
+					updateXAxisTitle();
+					Plotly.deleteTraces(myDiv, newTraceIndices);
+					Plotly.addTraces(myDiv, newTraces).then(function () {
+						reflectBinSizeColorOnLegend();
+						addToolTipsToTraceLegends();
+					});
+					break;
+				case "AddNewTrace":
+					var traces = computeTraceIndices();
+					for (var j = 0; j < newTracePVNames.length; j++) {
+						pvName = newTracePVNames[j];
+						if (!('trace' in viewerVars.pvData[pvName])) continue;
+						console.log("Checking to see if we need to add axis for " + pvName + " at " + viewerVars.pvData[pvName].traceIndex);
+						// Add the new axis if it does not exist in the layout already.
+						var longAxisName = viewerVars.y_short_2_long[viewerVars.pvData[pvName].axis];
+						if (!(longAxisName in myDiv.layout)) {
+							var layoutChanges = getLayoutChangesForMultipleYAxes(myDiv.layout);
+							Plotly.relayout(myDiv, layoutChanges)
+								.then(Plotly.addTraces(myDiv, viewerVars.pvData[pvName].trace, viewerVars.pvData[pvName].traceIndex))
+								.then(addToolTipsToTraceLegends());
+						} else {
+							Plotly.addTraces(myDiv, viewerVars.pvData[pvName].trace, viewerVars.pvData[pvName].traceIndex)
+								.then(addToolTipsToTraceLegends);
+						}
 					}
-				}
-				break;
-			case "NewPlot":
-				alert("Should not be here....");
-				break;
-			default:
-				alert("Should not be here....");
-				break;
+					break;
+				case "NewPlot":
+					alert("Should not be here....");
+					break;
+				default:
+					alert("Should not be here....");
+					break;
 			}
 		}
 	}).fail(function() { console.log("Failed to get data from the server"); });;
@@ -526,7 +592,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 
 // The modebar is specified in the plotConfig. Use icons from font-awesome to create our modebar buttons.
 function generatePlotConfig() {
-	var bPhone = (window.screen.availHeight > window.screen.availWidth) ? true : false;
+	var bPhone = (window.screen.availHeight > window.screen.availWidth);
 	var newModeBarButtons = [];
 	newModeBarButtons.push({ name: 'Start/End',
 		icon: viewerVars.icons['regular/calendar-alt'],
@@ -535,13 +601,13 @@ function generatePlotConfig() {
 			$("#dialog_endTime").val(moment(viewerVars.end).format("YYYY/MM/DD HH:mm:ss"));
 			$('#startEndTimeModal').modal('show');
 		}});
-	if (viewerVars.plotType == viewerVars.plotTypeEnum.SCATTER_2D && bPhone == false) {
+	if (viewerVars.plotType === viewerVars.plotTypeEnum.SCATTER_2D && bPhone == false) {
 		newModeBarButtons.push({ name: 'Add PVs',
 			icon: viewerVars.icons['solid/search'],
 			click: function() { $('#searchAndAddPVsModal').modal('show'); }
 		});
 	}
-	if (bPhone == false) {
+	if (bPhone === false) {
 		newModeBarButtons.push({ name: 'Show Data',
 			icon: viewerVars.icons['solid/save'],
 			click: showChartDataAsText
@@ -551,30 +617,33 @@ function generatePlotConfig() {
 		icon: viewerVars.icons['solid/download'],
 		click: exportToCSV
 	});
-	if (bPhone == false) {
+	if (bPhone === false) {
 		newModeBarButtons.push({ name: 'Link to current',
 			icon: viewerVars.icons['solid/link'],
 			click: showLinkToCurrentView
 		});
 	}
-    if(viewerVars.siteSupportsPostToElog) {
-        newModeBarButtons.push({ name: 'Post to elog',
-    		icon: viewerVars.icons['solid/share'],
-    		click: showElogModal
-    	});
-    }
+	if (viewerVars.siteSupportsPostToElog) {
+		newModeBarButtons.push({
+			name: 'Post to elog',
+			icon: viewerVars.icons['solid/share'],
+			click: showElogModal
+		});
+	}
 	if (bPhone == false) {
-	    newModeBarButtons.push({ name: 'Y Axes ranges',
+		newModeBarButtons.push({
+			name: 'Y Axes ranges',
 			icon: viewerVars.icons['solid/text-height'],
 			click: showYAxesRangeModal
 		});
 	}
 	if (bPhone == false) {
-	    newModeBarButtons.push({ name: 'Remove PVs',
+		newModeBarButtons.push({
+			name: 'Remove PVs',
 			icon: viewerVars.icons['solid/trash-alt'],
 			click: showRemovePVsModal
 		});
-	}	
+	}
 	if (bPhone == false) {
 		newModeBarButtons.push({ name: 'Help',
 			icon: viewerVars.icons['regular/question-circle'],
@@ -585,9 +654,9 @@ function generatePlotConfig() {
 
 	// Add mode bar buttons for start+end time etc
 	var plotConfig = {
-			displaylogo: false,
-			modeBarButtonsToAdd: newModeBarButtons,
-			modeBarButtonsToRemove: bPhone ? ['sendDataToCloud', 'toggleSpikelines', 'toImage', 'toggleHover', 'hoverClosestCartesian', 'hoverCompareCartesian'] : ['sendDataToCloud']
+		displaylogo: false,
+		modeBarButtonsToAdd: newModeBarButtons,
+		modeBarButtonsToRemove: bPhone ? ['sendDataToCloud', 'toggleSpikelines', 'toImage', 'toggleHover', 'hoverClosestCartesian', 'hoverCompareCartesian'] : ['sendDataToCloud']
 	};
 	return plotConfig;
 }
@@ -644,51 +713,64 @@ function process3DPlot(pvName, data) {
 		// Perform animation for each frame.
 		function range(len) { var ret = []; for(var i = 0; i < len; i++) { ret.push(i); } return ret; }
 		function spikeCurrentFrame() { var ret = []; for(var i = 0; i < totalFrames; i++) { ret.push((i == currentFrame) ? 4 : 1); } return ret; }
-        function getTimestampStrings() { var ret = []; for(var i = 0; i < viewerVars.pvData[pvName].secs.length; i++) { ret.push(moment(viewerVars.pvData[pvName].secs[i]).format("MMM/D/YYYY HH:mm:ss.SSS")); } return ret; }
+
+		function getTimestampStrings() {
+			var ret = [];
+			for (var i = 0; i < viewerVars.pvData[pvName].secs.length; i++) {
+				ret.push(moment(viewerVars.pvData[pvName].secs[i]).format("MMM/D/YYYY HH:mm:ss.SSS"));
+			}
+			return ret;
+		}
 
 		var valueTrace = {
-				x: range(viewerVars.pvData[pvName].vals[currentFrame].length),
-				y: viewerVars.pvData[pvName].vals[currentFrame],
-				name: pvName,
-				hoverlabel: {namelength :-1},
-				type: 'scatter',
-				yaxis: 'y1'
+			x: range(viewerVars.pvData[pvName].vals[currentFrame].length),
+			y: viewerVars.pvData[pvName].vals[currentFrame],
+			name: pvName,
+			hoverlabel: {namelength: -1},
+			type: 'scatter',
+			yaxis: 'y1'
 		};
 		var timeTrace = {
-				x: viewerVars.pvData[pvName].secs,
-				y: spikeCurrentFrame(),
-				name: "Time",
-				type: 'scatter',
-				xaxis: 'x2',
-				yaxis: 'y2',
-                hovertext: getTimestampStrings(),
-				mode: "markers",
-				marker: { size: 5 }
+			x: viewerVars.pvData[pvName].secs,
+			y: spikeCurrentFrame(),
+			name: "Time",
+			type: 'scatter',
+			xaxis: 'x2',
+			yaxis: 'y2',
+			hovertext: getTimestampStrings(),
+			mode: "markers",
+			marker: {size: 5}
 		};
 
 		if('layout' in myDiv) { // Plotly object already exists.
 			Plotly.deleteTraces(myDiv, [0,1])
-			.then(function() {
-				Plotly.addTraces(myDiv, [valueTrace, timeTrace]);
-			});
+				.then(function () {
+					Plotly.addTraces(myDiv, [valueTrace, timeTrace]);
+				});
 		} else { // Plotly object does not exist.
 			viewerVars.plotType = viewerVars.plotTypeEnum.ANIMATE_3D;
 			var layout = {
-					title: 'EPICS Archiver Appliance Viewer',
-					height: window.innerHeight*0.95,
-					showlegend: true,
-					legend: {x: 0, y: 1},
-					xaxis: {type: 'linear', autorange: true},
-					yaxis: {autorange: true, domain: [0, 0.8]},
-					xaxis2: {type: 'date', rangeselector: viewerVars.selectorOptions, autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()], anchor: 'y2'},
-					yaxis2: {autorange: false, range: [0, 10], domain: [0.8, 1.0], anchor: 'x2'},
+				title: 'EPICS Archiver Appliance Viewer',
+				height: window.innerHeight * 0.95,
+				showlegend: true,
+				legend: {x: 0, y: 1},
+				xaxis: {type: 'linear', autorange: true},
+				yaxis: {autorange: true, domain: [0, 0.8]},
+				xaxis2: {
+					type: 'date',
+					rangeselector: viewerVars.selectorOptions,
+					autorange: false,
+					range: [viewerVars.start.getTime(), viewerVars.end.getTime()],
+					anchor: 'y2'
+				},
+				yaxis2: {autorange: false, range: [0, 10], domain: [0.8, 1.0], anchor: 'x2'},
 			};
 
 			var plotConfig = generatePlotConfig();
 			Plotly.newPlot('archViewer', [valueTrace, timeTrace], layout, plotConfig)
-			.then(function() {
-				myDiv.on('plotly_relayout', processChangesOnXAxis);
-			});
+				.then(function () {
+					myDiv.on('plotly_relayout', processChangesOnXAxis);
+				});
 		}
 
 
@@ -717,7 +799,7 @@ function updateXAxisTitle() {
 function addToolTipsToTraceLegends() {
 	$("g.legend g.traces").each(function() {
 		var pvName = $( this ).children('.legendtext').attr('data-unformatted');
-        var ttipText = _.get(viewerVars.pvData[pvName], 'DESC', '') + "  -  (" + _.get(viewerVars.pvData[pvName], 'egu', 'N/A') + ")";
+		var ttipText = _.get(viewerVars.pvData[pvName], 'DESC', '') + "  -  (" + _.get(viewerVars.pvData[pvName], 'egu', 'N/A') + ")";
 		var ttip = document.createElementNS("http://www.w3.org/2000/svg", 'title');
 		ttip.appendChild(document.createTextNode(ttipText));
 		$( this )[0].appendChild(ttip);
@@ -787,10 +869,10 @@ function searchForPVsMatchingPattern() {
 			matchingPVs.forEach(function(matchingPV) { list.append('<li class="list-group-item">' + matchingPV + '</li>') });
 			$("#pvNameSearchMatchingList li").click(function() { $(this).toggleClass('list-group-item-info'); });
 		} else if(matchingPVs.length == 1) {
-            $('#searchAndAddPVsModal').modal('hide');
-            addTraceForNewPVs(matchingPVs);
-            return;
-        } else {
+			$('#searchAndAddPVsModal').modal('hide');
+			addTraceForNewPVs(matchingPVs);
+			return;
+		} else {
 			$("#pvNameSearchMatchingError").html("No PV names matched your search. Search using GLOB patterns, for example, QUAD:*:BDES");
 		}
 	});
@@ -800,11 +882,11 @@ function addSelectedSearchPVs(e) {
 	var selectedPVs = [];
 	$("#pvNameSearchMatchingList li.list-group-item-info").each(function(index) { selectedPVs.push($(this).text())});
 	if(selectedPVs.length > 0) {
-        $('#searchAndAddPVsModal').modal('hide');
-        addTraceForNewPVs(selectedPVs);
-        return true;
-    }
-    return false;
+		$('#searchAndAddPVsModal').modal('hide');
+		addTraceForNewPVs(selectedPVs);
+		return true;
+	}
+	return false;
 }
 
 function fixBinSize() {
@@ -890,11 +972,11 @@ function exportToCSV() {
 	var d = getCurrentDataAsDict();
 	var names = d[0];
 	var tbl = Object.fromEntries(Object.entries(d[1]).sort());
-	
+
 	if (viewerVars.replaceNA) {
 		let memoTbl = Array.from(tbl[Object.keys(tbl)[0]]);
 		let firstTbl = Array.from(tbl[Object.keys(tbl)[0]]);
-		
+
 		// replace N/A value with previous non N/A value
 		Object.keys(tbl).forEach(function(key) {
 			tbl[key] = tbl[key].map(function(val, index) {
@@ -906,7 +988,7 @@ function exportToCSV() {
 					memoTbl[index] = val;
 					// memorize fisrt value which is not N/A
 					if (firstTbl[index] == 'N/A') firstTbl[index] = val;
-				} 
+				}
 				return val;
 			});
 		});
@@ -941,13 +1023,13 @@ function viewFile(csvContent) {
 }
 
 function toLocal(date) {
-  var local = new Date(date);
-  local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return local.toJSON();
+	var local = new Date(date);
+	local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+	return local.toJSON();
 }
 
 function getLinkToCurrentView() {
-    var linkToCurrentView = window.location.href.split('?')[0] + '?';
+	var linkToCurrentView = window.location.href.split('?')[0] + '?';
 	var first = true;
 	for(var i in viewerVars.pvs) {
 		var pvName = viewerVars.pvs[i];
@@ -956,14 +1038,18 @@ function getLinkToCurrentView() {
 	}
 	linkToCurrentView += "&from=" + viewerVars.start.toISOString();
 	linkToCurrentView += "&to="   + viewerVars.end.toISOString();
-    if(viewerVars.userFixedBinSize) { linkToCurrentView += "&binSize="   + viewerVars.binSize; }
-    if(!_.isEmpty(viewerVars.egu_yaxis_specs)) {  linkToCurrentView += "&yaxes=" + encodeURIComponent(JSON.stringify(viewerVars.egu_yaxis_specs)); }
-    return linkToCurrentView;
+	if (viewerVars.userFixedBinSize) {
+		linkToCurrentView += "&binSize=" + viewerVars.binSize;
+	}
+	if (!_.isEmpty(viewerVars.egu_yaxis_specs)) {
+		linkToCurrentView += "&yaxes=" + encodeURIComponent(JSON.stringify(viewerVars.egu_yaxis_specs));
+	}
+	return linkToCurrentView;
 }
 
 // URL to what we are currently showing...
 function showLinkToCurrentView() {
-    var linkToCurrentView = getLinkToCurrentView();
+	var linkToCurrentView = getLinkToCurrentView();
 	console.log(linkToCurrentView);
 	$("#linkText").val(linkToCurrentView);
 	$('#linkModal').modal('show');
@@ -974,127 +1060,149 @@ function showHelp() {
 }
 
 function allowDrop(ev) {
-    ev.preventDefault();
+	ev.preventDefault();
 }
 
 function drop(ev) {
-    ev.preventDefault();
-    var pvName = ev.dataTransfer.getData("text").trim();
-    if(typeof pvName !== 'undefined' && pvName && pvName.length > 2) {
-        console.log("Dropping in pv " + pvName);
-    	addTraceForNewPVs([pvName]);
-    }
+	ev.preventDefault();
+	var pvName = ev.dataTransfer.getData("text").trim();
+	if (typeof pvName !== 'undefined' && pvName && pvName.length > 2) {
+		console.log("Dropping in pv " + pvName);
+		addTraceForNewPVs([pvName]);
+	}
 }
 
 function showElogModal(gd) {
-    if(gd._snapshotInProgress) { alert('Already posting to the elog'); return; }
-    function makeblob(dataURL) { // from https://stackoverflow.com/questions/34047648/how-to-post-an-image-in-base64-encoding-via-ajax/34064793
-        var BASE64_MARKER = ';base64,';
-        if (dataURL.indexOf(BASE64_MARKER) == -1) {
-            var parts = dataURL.split(','), contentType = parts[0].split(':')[1], raw = decodeURIComponent(parts[1]);
-            return new Blob([raw], { type: contentType });
-        }
-        var parts = dataURL.split(BASE64_MARKER), contentType = parts[0].split(':')[1], raw = window.atob(parts[1]), rawLength = raw.length, uInt8Array = new Uint8Array(rawLength);
-        for (var i = 0; i < rawLength; ++i) { uInt8Array[i] = raw.charCodeAt(i); }
-        return new Blob([uInt8Array], { type: contentType });
-    }
-    gd._snapshotInProgress = true;
-    var promise = Plotly.toImage(gd, {'format': 'png'})
-      .then(function(result) {
-          gd._snapshotInProgress = false;
-          viewerVars.currentSnapshot = makeblob(result);
-          console.log("Done generating snapshot and storing in viewervars");
-          $("#elogComment").val("");
-          $('#elogModal').modal('show');
-      })
-      .catch(function() {
-          gd._snapshotInProgress = false;
-          viewerVars.currentSnapshot = null;
-          alert("There was a problem creating a snapshot");
-      });}
+	if (gd._snapshotInProgress) {
+		alert('Already posting to the elog');
+		return;
+	}
+
+	function makeblob(dataURL) { // from https://stackoverflow.com/questions/34047648/how-to-post-an-image-in-base64-encoding-via-ajax/34064793
+		var BASE64_MARKER = ';base64,';
+		if (dataURL.indexOf(BASE64_MARKER) == -1) {
+			var parts = dataURL.split(','), contentType = parts[0].split(':')[1], raw = decodeURIComponent(parts[1]);
+			return new Blob([raw], {type: contentType});
+		}
+		var parts = dataURL.split(BASE64_MARKER), contentType = parts[0].split(':')[1], raw = window.atob(parts[1]),
+			rawLength = raw.length, uInt8Array = new Uint8Array(rawLength);
+		for (var i = 0; i < rawLength; ++i) {
+			uInt8Array[i] = raw.charCodeAt(i);
+		}
+		return new Blob([uInt8Array], {type: contentType});
+	}
+
+	gd._snapshotInProgress = true;
+	var promise = Plotly.toImage(gd, {'format': 'png'})
+		.then(function (result) {
+			gd._snapshotInProgress = false;
+			viewerVars.currentSnapshot = makeblob(result);
+			console.log("Done generating snapshot and storing in viewervars");
+			$("#elogComment").val("");
+			$('#elogModal').modal('show');
+		})
+		.catch(function () {
+			gd._snapshotInProgress = false;
+			viewerVars.currentSnapshot = null;
+			alert("There was a problem creating a snapshot");
+		});
+}
 
 function postToELog() {
-    if(viewerVars.currentSnapshot == null) { return; }
-    var data = new FormData();
-    data.append("snapshot", viewerVars.currentSnapshot);
-    data.append("comment", $("#elogComment").val());
-    data.append("link", getLinkToCurrentView());
-    $.ajax({
-        url: viewerVars.postToElogURL,
-        cache: false, contentType: false, processData: false,
-        method: 'POST',
-        data: data
-       })
-   .done(function(data) { console.log("Successfully posted to the elog"); })
-   .fail(function(jqXHR, textStatus, errorThrown) { alert("Error posting to the elog " + jqXHR.statusText); console.log(jqXHR);})
-   .always(function(){ viewerVars.currentSnapshot = null; })
+	if (viewerVars.currentSnapshot == null) {
+		return;
+	}
+	var data = new FormData();
+	data.append("snapshot", viewerVars.currentSnapshot);
+	data.append("comment", $("#elogComment").val());
+	data.append("link", getLinkToCurrentView());
+	$.ajax({
+		url: viewerVars.postToElogURL,
+		cache: false, contentType: false, processData: false,
+		method: 'POST',
+		data: data
+	})
+		.done(function (data) {
+			console.log("Successfully posted to the elog");
+		})
+		.fail(function (jqXHR, textStatus, errorThrown) {
+			alert("Error posting to the elog " + jqXHR.statusText);
+			console.log(jqXHR);
+		})
+		.always(function () {
+			viewerVars.currentSnapshot = null;
+		})
 }
 
 function showYAxesRangeModal() {
-    var axtmpl = `{{#.}}<tr><td><label>{{egu}}</label></td><td><input type="text" class="form-control" name="{{egu}}_min" value="{{min}}"/></td><td><input type="text" class="form-control" name="{{egu}}_max" value="{{max}}"/></td></tr>{{/.}}`;
-    Mustache.parse(axtmpl);
-    var yranges = _.map(viewerVars.egu2axis, function(v, k) { return {
-        "egu": k,
-        "min": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[0]', -10)),
-        "max": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[1]',  10))
-    }})
-    $("#yAxesModal").find("table tbody").empty().append(Mustache.render(axtmpl, yranges));
-    $('#yAxesModal').modal('show');
+	var axtmpl = `{{#.}}<tr><td><label>{{egu}}</label></td><td><input type="text" class="form-control" name="{{egu}}_min" value="{{min}}"/></td><td><input type="text" class="form-control" name="{{egu}}_max" value="{{max}}"/></td></tr>{{/.}}`;
+	Mustache.parse(axtmpl);
+	var yranges = _.map(viewerVars.egu2axis, function (v, k) {
+		return {
+			"egu": k,
+			"min": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[0]', -10)),
+			"max": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[1]', 10))
+		}
+	})
+	$("#yAxesModal").find("table tbody").empty().append(Mustache.render(axtmpl, yranges));
+	$('#yAxesModal').modal('show');
 }
 
 function applyYAxesRanges() {
-    var newlayout = myDiv.layout;
-    _.each(viewerVars.egu2axis, function(v, k) {
-        var range = [parseFloat($("#yAxesModal").find("table tbody").find("input[name="+k+"_min]").val()), parseFloat($("#yAxesModal").find("table tbody").find("input[name="+k+"_max]").val())];
-        _.set(viewerVars.egu_yaxis_specs, k + '.range', range);
-        _.set(newlayout, viewerVars.y_short_2_long[v] + ".autorange", false);
-        _.set(newlayout, viewerVars.y_short_2_long[v] + ".range", range);
-    });
-    fetchDataFromServerAndPlot("ReplaceTraces");
+	var newlayout = myDiv.layout;
+	_.each(viewerVars.egu2axis, function (v, k) {
+		var range = [parseFloat($("#yAxesModal").find("table tbody").find("input[name=" + k + "_min]").val()), parseFloat($("#yAxesModal").find("table tbody").find("input[name=" + k + "_max]").val())];
+		_.set(viewerVars.egu_yaxis_specs, k + '.range', range);
+		_.set(newlayout, viewerVars.y_short_2_long[v] + ".autorange", false);
+		_.set(newlayout, viewerVars.y_short_2_long[v] + ".range", range);
+	});
+	fetchDataFromServerAndPlot("ReplaceTraces");
 }
 
 function showRemovePVsModal() {
-    if(viewerVars.pvs.length <= 0) { return; }
-    var rmtmpl = `{{#pvNames}}<div class="checkbox"><label><input type="checkbox" value="{{.}}">{{.}}</label></div>{{/pvNames}}`;
-    Mustache.parse(rmtmpl);
-    $("#removePVsModal").find(".checkboxlist").empty().append(Mustache.render(rmtmpl, { pvNames: viewerVars.pvs }));
-    $('#removePVsModal').modal('show');
+	if (viewerVars.pvs.length <= 0) {
+		return;
+	}
+	var rmtmpl = `{{#pvNames}}<div class="checkbox"><label><input type="checkbox" value="{{.}}">{{.}}</label></div>{{/pvNames}}`;
+	Mustache.parse(rmtmpl);
+	$("#removePVsModal").find(".checkboxlist").empty().append(Mustache.render(rmtmpl, {pvNames: viewerVars.pvs}));
+	$('#removePVsModal').modal('show');
 }
 
 function removePVFromPlot(pvName) {
-    console.log("Removing " + pvName);
-    var index = _.indexOf(viewerVars.pvs, pvName);
-    if (index >= 0) {
-        viewerVars.pvs.splice(index, 1);
-        delete viewerVars.pvData[pvName];
-        Plotly.deleteTraces(myDiv, index);
-    }
+	console.log("Removing " + pvName);
+	var index = _.indexOf(viewerVars.pvs, pvName);
+	if (index >= 0) {
+		viewerVars.pvs.splice(index, 1);
+		delete viewerVars.pvData[pvName];
+		Plotly.deleteTraces(myDiv, index);
+	}
 }
 
 function removeSelectedPVs() {
-    $("#removePVsModal").find(".checkboxlist").find("input:checked").each(function(){
-        removePVFromPlot($(this).val());
-    });
+	$("#removePVsModal").find(".checkboxlist").find("input:checked").each(function () {
+		removePVFromPlot($(this).val());
+	});
 }
 
 $(document).ready( function() {
-    $.getJSON("lib/fapaths.json").done(function(icons){
-        viewerVars.icons = icons;
-        parseURLParameters();
-    	if(viewerVars.pvs.length == 0) {
-    		$('#searchAndAddPVsModal').modal('show');
-    	} else {
-    		fetchDataFromServerAndPlot("NewPlot");
-    	}
-    })
+	$.getJSON("lib/fapaths.json").done(function (icons) {
+		viewerVars.icons = icons;
+		parseURLParameters();
+		if (viewerVars.pvs.length == 0) {
+			$('#searchAndAddPVsModal').modal('show');
+		} else {
+			fetchDataFromServerAndPlot("NewPlot");
+		}
+	})
 
-    $(document).on("paste", function(ev) {
-        var pvName = ev.originalEvent.clipboardData.getData('text/plain').trim();
-        if(typeof pvName !== 'undefined' && pvName && pvName.length > 2) {
-            console.log("Pasting PV from clipboard event " + pvName);
-            addTraceForNewPVs([ev.originalEvent.clipboardData.getData('text/plain').trim()]);
-        }
-    });
+	$(document).on("paste", function (ev) {
+		var pvName = ev.originalEvent.clipboardData.getData('text/plain').trim();
+		if (typeof pvName !== 'undefined' && pvName && pvName.length > 2) {
+			console.log("Pasting PV from clipboard event " + pvName);
+			addTraceForNewPVs([ev.originalEvent.clipboardData.getData('text/plain').trim()]);
+		}
+	});
 
 
 	// There is a big SVG drag area over much of the plot; so we do this to determine if the user has clicked on some plot element.
