@@ -46,8 +46,12 @@ viewerVars.timerIndexFor3DAnimation = -1;
 viewerVars.icons = {}
 // We take a snapshot of the gd before showing the comment modal. This is stored here
 viewerVars.currentSnapshot = null;
+viewerVars.currentButton = '';
 
-
+// last interval choice
+var lastInterval = null;
+// last time unit choice
+var lastUnit = null;
 
 // This is one of the integration points with the server.
 // This should default to a path relative location that works from the appliance UI.
@@ -65,28 +69,29 @@ $.get("../../../site_params.json")
     viewerVars.siteSupportsPostToElog = _.get(site_params, "siteSupportsPostToElog", false);
 })
 
-
-
 // Google finance like list of time windows..
 viewerVars.selectorOptions = {
-		buttons: [{step: 'second',  stepmode: 'backward', count: 30, label: '30s'   },
-		          {step: 'minute',  stepmode: 'backward', count: 1,  label: '1m'    },
-		          {step: 'minute',  stepmode: 'backward', count: 5,  label: '5m'    },
-		          {step: 'minute',  stepmode: 'backward', count: 15, label: '15m'   },
-		          {step: 'minute',  stepmode: 'backward', count: 30, label: '30m'   },
-		          {step: 'hour',    stepmode: 'backward', count: 1,  label: '1h'    },
-		          {step: 'hour',    stepmode: 'backward', count: 4,  label: '4h'    },
-		          {step: 'hour',    stepmode: 'backward', count: 8,  label: '8h'    },
-		          {step: 'day',     stepmode: 'backward', count: 1,  label: '1d'    },
-		          {step: 'day',     stepmode: 'backward', count: 2,  label: '2d'    },
-		          {step: 'day',     stepmode: 'backward', count: 7,  label: '1w'    },
-		          {step: 'day',     stepmode: 'backward', count: 14, label: '2w'    },
-		          {step: 'month',   stepmode: 'backward', count: 1,  label: '1M'    },
-		          {step: 'month',   stepmode: 'backward', count: 6,  label: '6M'    },
-		          {step: 'year',    stepmode: 'backward', count: 1,  label: '1Y'    },
-		          {step: 'year',    stepmode: 'todate',   count: 1,  label: 'YTD'   },
-		          {step: 'minute',  stepmode: 'forward',  count: 7,  label: 'Live'  },
-		          ]
+	bgcolor: '#fdae61',
+	activecolor : '#f57a03',
+	buttons: [
+				{step: 'second',  stepmode: 'backward', count: 30, label: '30s'   },
+				{step: 'minute',  stepmode: 'backward', count: 1,  label: '1m'    },
+				{step: 'minute',  stepmode: 'backward', count: 5,  label: '5m'    },
+				{step: 'minute',  stepmode: 'backward', count: 15, label: '15m'   },
+				{step: 'minute',  stepmode: 'backward', count: 30, label: '30m'   },
+				{step: 'hour',    stepmode: 'backward', count: 1,  label: '1h'    },
+				{step: 'hour',    stepmode: 'backward', count: 4,  label: '4h'    },
+				{step: 'hour',    stepmode: 'backward', count: 8,  label: '8h'    },
+				{step: 'day',     stepmode: 'backward', count: 1,  label: '1d'    },
+				{step: 'day',     stepmode: 'backward', count: 2,  label: '2d'    },
+				{step: 'day',     stepmode: 'backward', count: 7,  label: '1w'    },
+				{step: 'day',     stepmode: 'backward', count: 14, label: '2w'    },
+				{step: 'month',   stepmode: 'backward', count: 1,  label: '1M'    },
+				{step: 'month',   stepmode: 'backward', count: 6,  label: '6M'    },
+				{step: 'year',    stepmode: 'backward', count: 1,  label: '1Y'    },
+				{step: 'year',    stepmode: 'todate',   count: 1,  label: 'YTD'   },
+				{step: 'minute',  stepmode: 'forward',  count: 7,  label: 'Live'  },
+			]
 };
 
 if (window.screen.availHeight > window.screen.availWidth) {
@@ -266,42 +271,39 @@ function processChangesOnXAxis(eventdata) {
 			fetchDataFromServerAndPlot("ReplaceTraces");
 			return;
 		}
-		if (Math.abs(duration - previousDuration) < 10*1000) {
-			console.log("Resolution stays the same; use extendTraces/prependTrace");
-			if(viewerVars.start < previousStart) {
-				// We panned left
-				viewerVars.queryStart = viewerVars.start;
-				viewerVars.queryEnd = previousStart;
-				fetchDataFromServerAndPlot("LeftPan");
-			} else {
-				// We panned right
-				viewerVars.queryStart = previousEnd;
-				viewerVars.queryEnd = viewerVars.end;
-				fetchDataFromServerAndPlot("RightPan");
-			}
+		console.log("Change in resolution; deleting and replacing traces");
+		determineBinSize();
+		viewerVars.queryStart = viewerVars.start;
+		viewerVars.queryEnd = viewerVars.end;
+		fetchDataFromServerAndPlot("ReplaceTraces");
+
+		var liveButtonCount = calculateLiveCount();
+		//if(duration == liveButtonCount && viewerVars.liveModeTimer == null) {
+		if(viewerVars.currentButton == "Live") {
+			if(viewerVars.liveModeTimer != null) clearInterval(viewerVars.liveModeTimer);
+			console.log("Kicking off live mode..");
+			var layoutChanges = {'xaxis' : { 'autorange' : false}};
+			layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
+			layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
+			layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
+			layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
+			Plotly.relayout(myDiv, layoutChanges);
+			viewerVars.liveModeTimer = setInterval(liveModeTick, 1*1000);
 		} else {
-			console.log("Change in resolution; deleting and replacing traces");
-			determineBinSize();
-			viewerVars.queryStart = viewerVars.start;
-			viewerVars.queryEnd = viewerVars.end;
-			fetchDataFromServerAndPlot("ReplaceTraces");
-			if(duration == 7*60*1000) {
-				console.log("Kicking off live mode..");
-				var layoutChanges = {'xaxis' : { 'autorange' : true}};
+			if(viewerVars.liveModeTimer != null) {
+				console.log("Entering static mode..");
+				clearInterval(viewerVars.liveModeTimer);
+				viewerVars.liveModeTimer = null;
+				var buttonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
+				viewerVars.selectorOptions.buttons[buttonIndex].step = 'minute';
+				viewerVars.selectorOptions.buttons[buttonIndex].count = 7;
+			
+				var layoutChanges = {'xaxis' : { 'autorange' : false}};
 				layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
+				layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 				layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
+				layoutChanges.title = 'EPICS Archiver Appliance Viewer (static mode)';
 				Plotly.relayout(myDiv, layoutChanges);
-				viewerVars.liveModeTimer = setInterval(liveModeTick, 1*1000);
-			} else {
-				if(viewerVars.liveModeTimer != null) {
-					clearInterval(viewerVars.liveModeTimer);
-					viewerVars.liveModeTimer = null;
-					var layoutChanges = {'xaxis' : { 'autorange' : false}};
-					layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
-					layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
-					layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-					Plotly.relayout(myDiv, layoutChanges);
-				}
 			}
 		}
 	} else if ('xaxis.range[0]' in eventdata) {
@@ -441,7 +443,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 
 		if(!('layout' in myDiv)) { // This means we are creating the plotly object for the first time...
 			var layout = {
-					title: 'EPICS Archiver Appliance Viewer',
+					title: 'EPICS Archiver Appliance Viewer (static mode)',
                     width: window.innerWidth,
 					height: window.innerHeight*0.95,
 					showlegend: true,
@@ -463,6 +465,20 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 				myDiv.on('plotly_relayout', processChangesOnXAxis);
 				addToolTipsToTraceLegends();
 			});
+
+			// click on Live button 
+			$('.rangeselector').on('click', 'g', function(event) {
+                if (viewerVars.currentButton == "Live") {
+					showAdvancedViewModal();
+				}
+            });
+			
+			// memorize current button
+			$('.rangeselector > g').on( "mouseenter", function(event) {
+				viewerVars.currentButton = event.currentTarget.lastChild.innerHTML;
+            });
+
+
 		} else { // We have already created the plotly object; use add/delete API's
 			var updateXs = [], updateYs = [], updateIndices = [], newTraces = [], newTraceIndices = [];
 			for(i = 0; i < viewerVars.pvs.length; i++) {
@@ -528,6 +544,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 function generatePlotConfig() {
 	var bPhone = (window.screen.availHeight > window.screen.availWidth) ? true : false;
 	var newModeBarButtons = [];
+
 	newModeBarButtons.push({ name: 'Start/End',
 		icon: viewerVars.icons['regular/calendar-alt'],
 		click: function() {
@@ -710,7 +727,9 @@ function getXAxisTitle() {
 
 // Update the X-Axis title based on changes to bin size and post-processor.
 function updateXAxisTitle() {
-	myDiv.layout.xaxis.title = getXAxisTitle();
+	if (myDiv.layout.xaxis.title != getXAxisTitle()) {
+		myDiv.layout.xaxis.title = getXAxisTitle();
+	}	
 }
 
 // If the PV has a .DESC, we add that as a tooltip to the PV's legend.
@@ -738,12 +757,22 @@ function reflectBinSizeColorOnLegend() {
 // Functions for the page start here.
 
 function liveModeTick() { // Timer function for the live mode tick...
+	var liveButtonCount = calculateLiveCount();
 	var now = new Date();
 	viewerVars.end = now;
-	viewerVars.start = new Date(now.getTime() - 7*60*1000);
+	viewerVars.start = new Date(now.getTime() - liveButtonCount);
 	viewerVars.queryStart = viewerVars.start;
 	viewerVars.queryEnd = viewerVars.end;
-	fetchDataFromServerAndPlot("RightPan");
+
+	var layoutChanges = {'xaxis' : { 'autorange' : false}};
+	layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
+	layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
+	layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
+	layoutChanges.xaxis.title = getXAxisTitle();
+	layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
+	Plotly.relayout(myDiv, layoutChanges);
+
+	fetchDataFromServerAndPlot("ReplaceTraces");
 }
 
 
@@ -1075,6 +1104,85 @@ function removeSelectedPVs() {
     $("#removePVsModal").find(".checkboxlist").find("input:checked").each(function(){
         removePVFromPlot($(this).val());
     });
+}
+
+// Advanced view modal
+function showAdvancedViewModal() {
+	var buttonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
+	lastUnit = viewerVars.selectorOptions.buttons[buttonIndex].step;
+	lastInterval = viewerVars.selectorOptions.buttons[buttonIndex].count;
+	var modal = `
+		<div class="row align-items-center">
+			<div class="col-auto">
+				<label for="timeInput"><b>Enter your desired interval:</b></label>
+			</div>
+			<div class="col-auto">
+				<input id="timeInput" name="timeInput" type="number" min="1" value="${lastInterval}" class="form-control" style="width: 110px;" required onblur="validateInput(this)" />
+			</div>
+			<script>
+    			function validateInput(input) {
+					if (input.value < 1) {
+						input.value = 1;
+					}
+				}
+			</script>
+			<div class="col-auto">
+				<label for="timeInput"><b>Select your desired time unit:</b></label>
+			</div>
+			<div class="col-auto">
+				<select class="form-control" id="unitInput" style="width: 110px;">
+					<option value="second" ${lastUnit === 'second' ? 'selected' : ''}>second(s)</option>
+					<option value="minute" ${lastUnit === 'minute' ? 'selected' : ''}>minute(s)</option>
+					<option value="hour" ${lastUnit === 'hour' ? 'selected' : ''}>hour(s)</option>
+					<option value="day" ${lastUnit === 'day' ? 'selected' : ''}>day(s)</option>
+				</select>
+			</div>
+		</div>
+		`;
+	Mustache.parse(modal);
+	$('#advancedViewModal').find('.input-field').empty().append(Mustache.render(modal));
+	$('#advancedViewModal').modal('show');
+}
+
+function showAdvancedView() {
+	var step = document.getElementById('unitInput').value;
+	var count = parseInt(document.getElementById('timeInput').value);
+	updateLiveButton(step, count);
+}
+
+// Update the properties (step, count) of Live button
+function updateLiveButton(newStep, newCount) {
+    var buttonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
+	viewerVars.selectorOptions.buttons[buttonIndex].step = newStep;
+	viewerVars.selectorOptions.buttons[buttonIndex].count = newCount;
+	var layoutChanges = {'xaxis' : { 'autorange' : false}};
+	layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
+	layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
+	layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
+	Plotly.relayout(myDiv, layoutChanges);
+}
+
+// Calculate the interval in millisecond
+function calculateLiveCount() {
+	var liveButtonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
+	var liveButtonCount = viewerVars.selectorOptions.buttons[liveButtonIndex].count;
+	var liveButtonStep = viewerVars.selectorOptions.buttons[liveButtonIndex].step;
+	switch (liveButtonStep) {
+		case "second":
+			liveButtonCount *= 1000;
+			break;
+		case "minute":
+			liveButtonCount *= (60*1000);
+			break;
+		case "hour":
+			liveButtonCount *= (60*60*1000);
+			break;
+		// day
+		default:
+			liveButtonCount *= (24*60*60*1000);
+			break;
+	}
+	return liveButtonCount;
 }
 
 $(document).ready( function() {
