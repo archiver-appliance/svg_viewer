@@ -332,7 +332,8 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 
 	let pvsToFetchData = (xAxisChangeType == "AddNewTrace") ? newTracePVNames : viewerVars.pvs;
 	let pvDataPromises = _.times(pvsToFetchData.length, function() { return new $.Deferred()}), datas = new Array(pvsToFetchData.length);
-	_.each(pvsToFetchData, function(pvName, i) {
+	_.each(pvsToFetchData, function(unsafePVName, i) {
+		let pvName = encodeURIComponent(unsafePVName);
 		let queryString = "";
 		if(viewerVars.binSize > 0) {
 			if (viewerVars.currentBinningOperator === "raw") {
