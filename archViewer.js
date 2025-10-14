@@ -483,7 +483,8 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 						title: getXAxisTitle(),
 						titlefont: {color: '#7f7f7f', }
 					},
-					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0]))
+					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0])),
+					hovermode: 'x unified'
 			};
 			var layoutChanges = getLayoutChangesForMultipleYAxes(layout);
 			$.extend(true, layout, layoutChanges);
@@ -737,6 +738,7 @@ function process3DPlot(pvName, data) {
 					anchor: 'y2'
 				},
 				yaxis2: {autorange: false, range: [0, 10], domain: [0.8, 1.0], anchor: 'x2'},
+				hovermode: 'x unified'
 			};
 
 			var plotConfig = generatePlotConfig();
