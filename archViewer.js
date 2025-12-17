@@ -547,7 +547,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 				case "AddNewTrace":
 					var traces = computeTraceIndices();
 					for (var j = 0; j < newTracePVNames.length; j++) {
-						pvName = newTracePVNames[j];
+						const pvName = newTracePVNames[j];
 						if (!('trace' in viewerVars.pvData[pvName])) continue;
 						console.log("Checking to see if we need to add axis for " + pvName + " at " + viewerVars.pvData[pvName].traceIndex);
 						// Add the new axis if it does not exist in the layout already.
