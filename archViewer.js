@@ -483,7 +483,8 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 						title: getXAxisTitle(),
 						titlefont: {color: '#7f7f7f', }
 					},
-					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0]))
+					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0])),
+					hovermode: 'x unified'
 			};
 			var layoutChanges = getLayoutChangesForMultipleYAxes(layout);
 			$.extend(true, layout, layoutChanges);
@@ -546,7 +547,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 				case "AddNewTrace":
 					var traces = computeTraceIndices();
 					for (var j = 0; j < newTracePVNames.length; j++) {
-						pvName = newTracePVNames[j];
+						const pvName = newTracePVNames[j];
 						if (!('trace' in viewerVars.pvData[pvName])) continue;
 						console.log("Checking to see if we need to add axis for " + pvName + " at " + viewerVars.pvData[pvName].traceIndex);
 						// Add the new axis if it does not exist in the layout already.
@@ -737,6 +738,7 @@ function process3DPlot(pvName, data) {
 					anchor: 'y2'
 				},
 				yaxis2: {autorange: false, range: [0, 10], domain: [0.8, 1.0], anchor: 'x2'},
+				hovermode: 'x unified'
 			};
 
 			var plotConfig = generatePlotConfig();
