@@ -20,26 +20,25 @@ The viewer URL then becomes http://your_web_server/archiveviewer/retrieval/ui/vi
  
 '''
 
-import SocketServer
-import SimpleHTTPServer
-import urllib
+import socketserver
+import http.server
+from urllib import request
 import argparse
 
 port = 16000
 retrievalURL = 'http://localhost:17668/retrieval'
 
-class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class Proxy(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        print self.path
         if self.path.startswith('/retrieval/ui/viewer/'):
             filename = self.path[len('/retrieval/ui/viewer/'):].split('?')[0]
-            # print filename
+            # print(filename)
             self.path = filename
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            http.server.SimpleHTTPRequestHandler.do_GET(self)
         else:
             proxiedurl = retrievalURL + self.path[len('/retrieval'):]
-            # print proxiedurl
-            self.copyfile(urllib.urlopen(proxiedurl), self.wfile)
+            print(proxiedurl)
+            self.copyfile(request.urlopen(proxiedurl), self.wfile)
             
 
 if __name__ == "__main__":
@@ -51,6 +50,6 @@ if __name__ == "__main__":
     port = args.port
     retrievalURL = args.retrievalURL
     
-    httpd = SocketServer.ForkingTCPServer(('', port), Proxy)
-    print "Listening on port", args.port, " and proxying", args.retrievalURL
+    httpd = socketserver.ForkingTCPServer(('', port), Proxy)
+    print("Listening on port", args.port, " and proxying", args.retrievalURL)
     httpd.serve_forever()
