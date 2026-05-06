@@ -1643,7 +1643,7 @@ $(document).ready( function() {
 	});
 
 
-# implement fullscreen logic
+// implement fullscreen logic
 document.addEventListener('fullscreenchange', function () {
     var isFullscreen = !!document.fullscreenElement;
 
