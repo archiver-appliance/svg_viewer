@@ -6,9 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EPICS Archiver Appliance</title>
 
+
 <link href="lib/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
 <link href="lib/bootstrap-3.3.7/css/bootstrap-datetimepicker.css" rel="stylesheet">
+
 <link href="lib/noty_3.1.4.css" rel="stylesheet">
+
+<link href="lib/archiver.css" rel="stylesheet">
 
 <script src="lib/lodash-4.17.10.min.js"></script>
 <script src="lib/plotly-2.35.2.min.js"></script>
@@ -74,54 +78,188 @@ text.fixedBinSize tspan:nth-child(2) {
 <body>
 
 <div id="wrapper" ondrop="drop(event)" ondragover="allowDrop(event)">
-<div id="archViewer"></div>
-</div>
 
 
-<!--  Start/end time dialog  -->
-<div id="startEndTimeModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Please enter the start and end times</h4>
-      </div>
-			<div class="container">
-			    <div class="row">
-			        <div class='col-sm-6'>
-			            <div class="form-group">
-			                <div class='input-group date' id='startTime'>
-			                	<span class="input-group-addon">Start Time:</span>
-			                    <input id='dialog_startTime' type='text' class="form-control"/>
-			                    <span class="input-group-addon">
-			                        <span class="glyphicon glyphicon-calendar"></span>
-			                    </span>
-			                </div>
-			                <div class='input-group date' id='endTime'>
-			                	<span class="input-group-addon">End Time:</span>
-			                    <input id='dialog_endTime' type='text' class="form-control" />
-			                    <span class="input-group-addon">
-			                        <span class="glyphicon glyphicon-calendar"></span>
-			                    </span>
-			                </div>
-			            </div>
-			        </div>
-			        <script type="text/javascript">
-			            $(function () {
-			                $('#startTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss"});
-			                $('#endTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss"});
-			                $('#startEndTimeModal').on('hidden.bs.modal', startAndEndTimeSelected);
-			            });
-			        </script>
-			    </div>
-			</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
+
+
+
+
+<div id="appContainer">
+
+<div id="pvSidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">Process Variables</div>
+        <input
+            id="pvSidebarSearch"
+            class="sidebar-search"
+            type="text"
+            placeholder="Search..."
+            autocomplete="off"
+            spellcheck="false"
+        />
+        <button id="pvSidebarToggle" title="Unpin sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="17" x2="12" y2="22"/>
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+            </svg>
+        </button>
     </div>
-  </div>
+    <div class="sidebar-status" id="pvSidebarStatus"></div>
+    <div class="sidebar-list" id="pvSidebarList"></div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-header">
+        <span class="sidebar-section-title">On Plot</span>
+        <span class="sidebar-section-count" id="pvSelectedCount"></span>
+    </div>
+    <div class="sidebar-list" id="pvSelectedList"></div>
+    <div class="sidebar-selected-actions" id="pvSelectedActions">
+        <button id="pvSelectAll"   class="sidebar-action-btn" disabled>Select All</button>
+        <button id="pvUnselectAll" class="sidebar-action-btn" disabled>Unselect All</button>
+        <button id="pvRemove"      class="sidebar-action-btn sidebar-action-btn-danger" disabled>Remove</button>
+    </div>
 </div>
-<!--  Start/end time dialog  -->
+
+<div id="mainPanel">
+<div id="dateRangeBar">
+        <span class="date-range-label">Start</span>
+        <div class="input-group date" id="startTime">
+            <input id="dialog_startTime" type="text" class="date-range-input" autocomplete="off" spellcheck="false"/>
+            <span class="input-group-addon date-range-icon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+        <span class="date-range-label">End</span>
+        <div class="input-group date" id="endTime">
+            <input id="dialog_endTime" type="text" class="date-range-input" autocomplete="off" spellcheck="false"/>
+            <span class="input-group-addon date-range-icon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+        <button id="applyDateRange" class="date-range-apply">Apply</button>
+        <div id="rangeButtons"></div>
+        <div id="chartTools">
+            <button class="action-btn active" id="toolZoom" title="Zoom">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolPan" title="Pan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolZoomIn" title="Zoom In">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolZoomOut" title="Zoom Out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolReset" title="Autoscale / Reset axes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+                </svg>
+            </button>
+            <button class="action-btn active" id="toolHoverClosest" title="Hover closest">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolHoverCompare" title="Compare data on hover">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/><line x1="3" y1="12" x2="21" y2="12"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolSpikeLines" title="Toggle spike lines">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3v18M3 12h18" stroke-dasharray="4 2"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="toolSavePng" title="Save as PNG">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>
+                </svg>
+            </button>
+        </div>
+        <div id="actionButtons">
+            <button class="action-btn" id="actionShowData" title="Show Data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="actionExportCSV" title="Export as CSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="actionLink" title="Link to current view">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="actionYAxes" title="Y Axes ranges">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="actionFullscreen" title="Fullscreen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
+            </button>
+            <button class="action-btn" id="actionElog" title="Post to elog" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+                </svg>
+            </button>
+        </div>
+        <button id="dateRangeBarToggle" title="Unpin top bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="17" x2="12" y2="22"/>
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+            </svg>
+        </button>
+        <script type="text/javascript">
+            $(function () {
+                function fixDatepickerPosition($component) {
+                    // The library positions using .position() (relative to offset parent),
+                    // but the widget lives in body and needs .offset() (document-absolute).
+                    // Use setTimeout to run after the library's own I() call finishes.
+                    setTimeout(function () {
+                        var $widget = $('.bootstrap-datetimepicker-widget:visible');
+                        if (!$widget.length) return;
+                        var off = $component.offset();
+                        $widget.css({
+                            top:  off.top + $component.outerHeight(),
+                            left: off.left
+                        });
+                    }, 0);
+                }
+                $('#startTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss", widgetParent: 'body'});
+                $('#endTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss", widgetParent: 'body'});
+                $('#startTime').on('dp.show', function () { fixDatepickerPosition($(this)); });
+                $('#endTime').on('dp.show', function () { fixDatepickerPosition($(this)); });
+                document.getElementById('applyDateRange').addEventListener('click', startAndEndTimeSelected);
+                renderRangeButtons();
+                document.getElementById('actionShowData').addEventListener('click', showChartDataAsText);
+                document.getElementById('actionExportCSV').addEventListener('click', exportToCSV);
+                document.getElementById('actionLink').addEventListener('click', showLinkToCurrentView);
+                document.getElementById('actionYAxes').addEventListener('click', showYAxesRangeModal);
+                document.getElementById('actionFullscreen').addEventListener('click', toggleFullscreen);
+                document.getElementById('actionElog').addEventListener('click', showElogModal);
+            });
+        </script>
+    </div>
+    <div id="archViewer"></div>
+</div>
+
+</div>
+
+
+</div>
 
 <!--  Search and add PVs  -->
 <div id="searchAndAddPVsModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

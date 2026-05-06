@@ -1,0 +1,577 @@
+/* ── Design tokens ───────────────────────────────────────── */
+:root {
+    --font-mono: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
+
+    --clr-bg-deep:        #0d0f11;
+    --clr-bg-mid:         #1c2026;
+    --clr-bg-mid-hover:   #252b33;
+    --clr-bg-sidebar:     #666A6B;
+    --clr-border:         #2a2e33;
+    --clr-border-hover:   #3a4049;
+
+    --clr-accent:         #f57a03;
+    --clr-accent-dim:     #d96e00;
+    --clr-active-bg:      #1a1500;
+    --clr-active-bg-hover:#201900;
+
+    --clr-text:           #c8d0d8;
+    --clr-text-dim:       #7a8694;
+    --clr-text-muted:     #454d57;
+
+    --clr-danger:         #c0440a;
+    --clr-danger-border:  #3a1800;
+    --clr-danger-bg:      #2a1200;
+
+    --clr-live:           #4caf50;
+    --clr-live-border:    #1a3a1a;
+    --clr-live-bg:        #001a00;
+}
+
+/* ── Page shell ──────────────────────────────────────────── */
+body {
+    display: flex;
+    margin: 0;
+    overflow: hidden;
+    position: relative; /* offset parent for datetimepicker widgets appended to body */
+}
+
+#appContainer {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.bootstrap-datetimepicker-widget {
+    z-index: 9999 !important;
+}
+
+/* ── PV Sidebar ──────────────────────────────────────────── */
+#pvSidebar {
+    width: 240px;
+    min-width: 240px;
+    align-self: stretch;
+    background: var(--clr-bg-sidebar);
+    border-right: 1px solid var(--clr-border);
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-mono);
+    isolation: isolate;
+    z-index: 100;
+    transition: width 0.25s ease, min-width 0.25s ease;
+    overflow: hidden;
+}
+
+#pvSidebar.unpinned {
+    width: 32px;
+    min-width: 32px;
+}
+
+#pvSidebar.unpinned.hovered {
+    width: 240px;
+    min-width: 240px;
+}
+
+/* Toggle button */
+#pvSidebarToggle {
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--clr-accent);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: background 0.15s;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+#pvSidebarToggle:hover {
+    background: var(--clr-bg-deep);
+}
+
+#pvSidebarToggle svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.25s ease;
+}
+
+/* When unpinned rotate the pin icon 45° to signal it is loose */
+#pvSidebar.unpinned #pvSidebarToggle svg {
+    transform: rotate(45deg);
+}
+
+/* When unpinned and not hovered, center the toggle inside the slim strip */
+#pvSidebar.unpinned:not(.hovered) #pvSidebarToggle {
+    right: 50%;
+    transform: translateX(50%);
+}
+
+/* Hide content when unpinned and not hovered */
+#pvSidebar.unpinned:not(.hovered) .sidebar-title,
+#pvSidebar.unpinned:not(.hovered) .sidebar-search,
+#pvSidebar.unpinned:not(.hovered) .sidebar-status,
+#pvSidebar.unpinned:not(.hovered) .sidebar-list,
+#pvSidebar.unpinned:not(.hovered) .sidebar-divider,
+#pvSidebar.unpinned:not(.hovered) .sidebar-section-header,
+#pvSidebar.unpinned:not(.hovered) .sidebar-selected-actions {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+#pvSidebar .sidebar-title,
+#pvSidebar .sidebar-search,
+#pvSidebar .sidebar-status,
+#pvSidebar .sidebar-list,
+#pvSidebar .sidebar-divider,
+#pvSidebar .sidebar-section-header,
+#pvSidebar .sidebar-selected-actions {
+    opacity: 1;
+    transition: opacity 0.2s ease 0.1s; /* slight delay so it fades in after expand */
+}
+
+#pvSidebar .sidebar-header {
+    padding: 10px 36px 8px 12px; /* right padding makes room for toggle */
+    border-bottom: 1px solid var(--clr-border);
+    background: var(--clr-bg-deep);
+    position: relative;
+    flex-shrink: 0;
+}
+
+#pvSidebar .sidebar-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--clr-accent);
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#pvSidebar .sidebar-search {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    color: var(--clr-text);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px 8px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+#pvSidebar .sidebar-search:focus {
+    border-color: var(--clr-accent);
+}
+
+#pvSidebar .sidebar-search::placeholder {
+    color: var(--clr-text-muted);
+}
+
+#pvSidebar .sidebar-status {
+    font-size: 9px;
+    color: var(--clr-text-muted);
+    padding: 5px 12px 0;
+    min-height: 18px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+#pvSidebar .sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+#pvSidebar .sidebar-list::-webkit-scrollbar       { width: 4px; }
+#pvSidebar .sidebar-list::-webkit-scrollbar-track  { background: transparent; }
+#pvSidebar .sidebar-list::-webkit-scrollbar-thumb  { background: var(--clr-border); border-radius: 2px; }
+
+#pvSidebar .pv-item {
+    padding: 5px 12px;
+    font-size: 10.5px;
+    color: var(--clr-text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 2px solid transparent;
+    transition: color 0.1s, background 0.1s, border-color 0.1s;
+    line-height: 1.5;
+}
+
+#pvSidebar .pv-item:hover {
+    background: var(--clr-bg-mid);
+    color: var(--clr-text);
+    border-left-color: var(--clr-border-hover);
+}
+
+#pvSidebar .pv-item.active {
+    color: var(--clr-accent);
+    border-left-color: var(--clr-accent);
+    background: var(--clr-active-bg);
+}
+
+#pvSidebar .pv-item.active:hover {
+    background: var(--clr-active-bg-hover);
+}
+
+/* Divider between search results and selected PVs */
+#pvSidebar .sidebar-divider {
+    height: 1px;
+    background: var(--clr-border);
+    flex-shrink: 0;
+}
+
+#pvSidebar .sidebar-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px 4px;
+    background: var(--clr-bg-deep);
+    flex-shrink: 0;
+}
+
+#pvSidebar .sidebar-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--clr-accent);
+    white-space: nowrap;
+}
+
+#pvSidebar .sidebar-section-count {
+    font-size: 9px;
+    color: var(--clr-text-muted);
+}
+
+/* Selected PV list */
+#pvSelectedList {
+    flex: 0 0 auto;
+    max-height: 200px;
+}
+
+#pvSelectedList .pv-item {
+    display: flex;
+    align-items: center;
+    color: var(--clr-accent);
+    border-left-color: var(--clr-accent);
+    background: var(--clr-active-bg);
+}
+
+#pvSelectedList .pv-item:hover {
+    background: var(--clr-active-bg-hover);
+    color: var(--clr-accent);
+    border-left-color: var(--clr-accent);
+}
+
+#pvSelectedList .pv-item-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#pvSelectedList .pv-checkbox {
+    flex-shrink: 0;
+    margin: 0 0 0 8px;
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+    accent-color: var(--clr-accent);
+}
+
+/* Selected PV action buttons */
+.sidebar-selected-actions {
+    display: flex;
+    gap: 4px;
+    padding: 5px 8px 7px;
+    flex-shrink: 0;
+    background: var(--clr-bg-deep);
+}
+
+.sidebar-selected-actions .sidebar-action-btn {
+    flex: 1;
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    color: var(--clr-text-dim);
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 2px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sidebar-selected-actions .sidebar-action-btn:hover {
+    background: var(--clr-bg-mid-hover);
+    color: var(--clr-text);
+    border-color: var(--clr-border-hover);
+}
+
+.sidebar-selected-actions .sidebar-action-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.sidebar-selected-actions .sidebar-action-btn-danger {
+    color: var(--clr-danger);
+    border-color: var(--clr-danger-border);
+}
+
+.sidebar-selected-actions .sidebar-action-btn-danger:hover {
+    background: var(--clr-danger-bg);
+    color: var(--clr-accent);
+    border-color: var(--clr-accent);
+}
+
+/* ── Main panel ──────────────────────────────────────────── */
+#mainPanel {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#archViewer {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ── Date range bar ──────────────────────────────────────── */
+#dateRangeBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--clr-bg-deep);
+    border-bottom: 1px solid var(--clr-border);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    overflow-x: auto;
+    overflow-y: visible;
+    white-space: nowrap;
+    max-height: 200px;
+    transition: max-height 0.22s ease, padding 0.22s ease;
+}
+
+#dateRangeBar.unpinned:not(.hovered) {
+    max-height: 8px;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Hide content when collapsed; pin button stays interactive via sticky */
+#dateRangeBar.unpinned:not(.hovered) > *:not(#dateRangeBarToggle) {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+/* Rotate the pin icon when unpinned */
+#dateRangeBar.unpinned #dateRangeBarToggle svg {
+    transform: rotate(45deg);
+}
+
+#dateRangeBarToggle {
+    flex-shrink: 0;
+    margin-left: auto;
+    position: sticky;
+    right: 0;
+    background: var(--clr-bg-deep);
+    border: none;
+    color: var(--clr-accent);
+    cursor: pointer;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    z-index: 10;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+
+#dateRangeBarToggle:hover {
+    background: var(--clr-bg-mid);
+}
+
+#dateRangeBarToggle svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.22s ease;
+}
+
+.date-range-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--clr-accent);
+    white-space: nowrap;
+    margin: 0;
+}
+
+#dateRangeBar .input-group.date {
+    width: auto;
+    display: flex;
+    align-items: stretch;
+}
+
+.date-range-input {
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px 0 0 3px;
+    border-right: none;
+    color: var(--clr-text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    outline: none;
+    width: 162px;
+    transition: border-color 0.15s;
+    height: auto;
+}
+
+.date-range-input:focus {
+    border-color: var(--clr-accent);
+}
+
+.date-range-icon {
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-left: none;
+    border-radius: 0 3px 3px 0;
+    color: var(--clr-text-muted);
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.date-range-apply {
+    background: var(--clr-accent);
+    border: none;
+    border-radius: 3px;
+    color: var(--clr-bg-deep);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-left: 4px;
+    flex-shrink: 0;
+}
+
+.date-range-apply:hover {
+    background: var(--clr-accent-dim);
+}
+
+/* ── Toolbar button groups ────────────────────────────────── */
+#rangeButtons,
+#chartTools,
+#actionButtons {
+    display: flex;
+    gap: 2px;
+    padding-left: 10px;
+    border-left: 1px solid var(--clr-border);
+    margin-left: 2px;
+    flex-shrink: 0;
+}
+
+.action-btn {
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    color: var(--clr-text-dim);
+    padding: 4px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    flex-shrink: 0;
+}
+
+.action-btn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.action-btn:hover {
+    background: var(--clr-bg-mid-hover);
+    color: var(--clr-text);
+    border-color: var(--clr-border-hover);
+}
+
+.action-btn.active {
+    background: var(--clr-active-bg);
+    color: var(--clr-accent);
+    border-color: var(--clr-accent);
+}
+
+#rangeButtons .range-btn {
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    color: var(--clr-text-dim);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#rangeButtons .range-btn:hover {
+    background: var(--clr-bg-mid-hover);
+    color: var(--clr-text);
+    border-color: var(--clr-border-hover);
+}
+
+#rangeButtons .range-btn.active {
+    background: var(--clr-active-bg);
+    color: var(--clr-accent);
+    border-color: var(--clr-accent);
+}
+
+#rangeButtons .range-btn.range-btn-live {
+    color: var(--clr-live);
+    border-color: var(--clr-live-border);
+}
+
+#rangeButtons .range-btn.range-btn-live:hover {
+    background: var(--clr-live-bg);
+    border-color: var(--clr-live);
+}
+
+#rangeButtons .range-btn.range-btn-live.active {
+    background: var(--clr-live-bg);
+    color: var(--clr-live);
+    border-color: var(--clr-live);
+}

@@ -110,7 +110,368 @@ if (window.screen.availHeight > window.screen.availWidth) {
 }
 
 
+// hide built-in Plotly range selector — this is done with specific buttons in the date bar
+viewerVars.selectorOptions.visible = false;
+
+
+// calculate available vertical space
+function plotAreaHeight() {
+    var bar = document.getElementById('dateRangeBar');
+    return window.innerHeight - (bar ? bar.offsetHeight : 0);
+}
+
+
+// implement PV sidebar
+(function () {
+    var searchTimer = null;
+    var DEBOUNCE_MS = 350;
+
+    function setStatus(msg) {
+        document.getElementById('pvSidebarStatus').textContent = msg;
+    }
+
+    function isOnPlot(pvName) {
+        return viewerVars.pvs.indexOf(pvName) >= 0;
+    }
+
+    function refreshActiveStates() {
+        document.querySelectorAll('#pvSidebarList .pv-item').forEach(function (el) {
+            var pv = el.getAttribute('data-pv');
+            el.classList.toggle('active', isOnPlot(pv));
+        });
+
+		var pvs = viewerVars.pvs;
+
+		//document.getElementById('pvSelectAll').disabled = (pvs.length != 0);
+    }
+
+    function renderSelectedList() {
+        var list = document.getElementById('pvSelectedList');
+        var countEl = document.getElementById('pvSelectedCount');
+        var pvs = viewerVars.pvs;
+        countEl.textContent = pvs.length ? '(' + pvs.length + ')' : '';
+        list.innerHTML = '';
+        if (pvs.length === 0) {
+            //list.innerHTML = '<div style="padding:8px 12px;font-size:10px;color:#454d57;">None on plot</div>';
+			document.getElementById('pvSelectAll').disabled = true;
+			document.getElementById('pvUnselectAll').disabled = true;
+			document.getElementById('pvRemove').disabled = true;
+			updatePlotVisibility();
+            return;
+        }
+        updatePlotVisibility();
+		document.getElementById('pvSelectAll').disabled = false;
+		document.getElementById('pvUnselectAll').disabled = false;
+		document.getElementById('pvRemove').disabled = true;
+        var frag = document.createDocumentFragment();
+        pvs.forEach(function (pv) {
+            var el = document.createElement('div');
+            el.className = 'pv-item';
+            el.setAttribute('data-pv', pv);
+            el.title = pv;
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'pv-item-name';
+            nameSpan.textContent = pv;
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'pv-checkbox';
+            cb.setAttribute('data-pv', pv);
+            el.addEventListener('click', function (e) {
+                if (e.target !== cb) { cb.checked = !cb.checked; }
+                updateRemoveButton();
+            });
+            cb.addEventListener('change', updateRemoveButton);
+            el.appendChild(nameSpan);
+            el.appendChild(cb);
+            frag.appendChild(el);
+        });
+        list.appendChild(frag);
+    }
+
+    function updateRemoveButton() {
+        var anyChecked = !!document.querySelector('#pvSelectedList .pv-checkbox:checked');
+        document.getElementById('pvRemove').disabled = !anyChecked;
+    }
+
+    function updatePlotVisibility() {
+        myDiv.style.display = viewerVars.pvs.length ? '' : 'none';
+    }
+
+    document.getElementById('pvSelectAll').addEventListener('click', function () {
+        document.querySelectorAll('#pvSelectedList .pv-checkbox').forEach(function (cb) {
+            cb.checked = true;
+        });
+        updateRemoveButton();
+    });
+
+    document.getElementById('pvUnselectAll').addEventListener('click', function () {
+        document.querySelectorAll('#pvSelectedList .pv-checkbox').forEach(function (cb) {
+            cb.checked = false;
+        });
+        updateRemoveButton();
+    });
+
+    document.getElementById('pvRemove').addEventListener('click', function () {
+        var toRemove = [];
+        document.querySelectorAll('#pvSelectedList .pv-checkbox:checked').forEach(function (cb) {
+            toRemove.push(cb.getAttribute('data-pv'));
+        });
+        toRemove.forEach(function (pv) { removePVFromPlot(pv); });
+        if (toRemove.length) {
+            setTimeout(function () {
+                renderSelectedList();
+                refreshActiveStates();
+            }, 100);
+        }
+    });
+
+
+
+
+
+function highlightTrace(pvName) {
+    if (!myDiv || !myDiv.data || myDiv.data.length === 0) return;
+
+    var targetIdx = (viewerVars.pvData[pvName] && 'traceIndex' in viewerVars.pvData[pvName])
+        ? viewerVars.pvData[pvName].traceIndex
+        : -1;
+
+    if (targetIdx < 0) return;
+
+    // Grab the SVG trace layers directly — Plotly renders each trace
+    // into a <g class="trace ..."> inside the plot's main SVG.
+    var traceLayers = myDiv.querySelectorAll('.scatterlayer .trace');
+    if (!traceLayers.length) return;
+
+    // Dim all, highlight target
+    traceLayers.forEach(function (el, i) {
+        el.style.transition = 'opacity 0.2s ease';
+        el.style.opacity    = (i === targetIdx) ? '1' : '0.12';
+    });
+
+    // Restore after 1.8s
+    setTimeout(function () {
+        traceLayers.forEach(function (el) {
+            el.style.opacity = '1';
+        });
+    }, 1800);
+}
+
+
+
+
+    function handlePVClick(pvName) {
+        if (isOnPlot(pvName)) {
+            // Already on plot — just highlight it
+            highlightTrace(pvName);
+        } else {
+            // Add it
+            addTraceForNewPVs([pvName]);
+            setStatus('Added ' + pvName);
+            setTimeout(function () {
+                refreshActiveStates();
+                setStatus('');
+            }, 600);
+        }
+    }
+
+    function renderList(pvNames) {
+        var list = document.getElementById('pvSidebarList');
+        list.innerHTML = '';
+        if (pvNames.length === 0) {
+            //list.innerHTML = '<div style="padding:10px 12px;font-size:10px;color:#454d57;">No matches</div>';
+            return;
+        }
+        var frag = document.createDocumentFragment();
+        pvNames.forEach(function (pv) {
+            var el = document.createElement('div');
+            el.className = 'pv-item' + (isOnPlot(pv) ? ' active' : '');
+            el.setAttribute('data-pv', pv);
+            el.textContent = pv;
+            el.title = pv;
+            el.addEventListener('click', function () { handlePVClick(pv); });
+            frag.appendChild(el);
+        });
+        list.appendChild(frag);
+    }
+
+    function doSearch(pattern) {
+        if (!pattern || pattern.length < 1) {
+            setStatus('0 results');
+            renderList([]);
+            return;
+        }
+        setStatus('Searching...');
+        $.getJSON(viewerVars.serverURL + '/../bpl/getMatchingPVs?limit=500&pv=' + encodeURIComponent(pattern))
+            .done(function (pvNames) {
+                setStatus(pvNames.length + ' result' + (pvNames.length === 1 ? '' : 's'));
+                renderList(pvNames);
+            })
+            .fail(function () {
+                setStatus('Search failed');
+                renderList([]);
+            });
+    }
+
+    document.getElementById('pvSidebarSearch').addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        var val = this.value.trim();
+        searchTimer = setTimeout(function () { doSearch(val); }, DEBOUNCE_MS);
+    });
+
+    // Keep active states in sync whenever traces change
+    var _origAdd = window.addTraceForNewPVs;
+    window.addTraceForNewPVs = function (pvNames) {
+        _origAdd(pvNames);
+        setTimeout(function () {
+            refreshActiveStates();
+            renderSelectedList();
+        }, 800);
+    };
+
+    // Initial hint
+    setStatus('0 results');
+    renderSelectedList();
+
+
+// implement side bar pin/unpin logic
+$(document).ready(function () {
+    var SIDEBAR_WIDTH = 240;
+    var COLLAPSED_WIDTH = 32;
+    var TRANSITION_MS = 260;
+
+    var $sidebar = $('#pvSidebar');
+    var $toggle  = $('#pvSidebarToggle');
+
+    function resizePlot() {
+        var isExpanded = !$sidebar.hasClass('unpinned') || $sidebar.hasClass('hovered');
+        var sidebarW = isExpanded ? SIDEBAR_WIDTH : COLLAPSED_WIDTH;
+        var newWidth = window.innerWidth - sidebarW;
+        if (myDiv && myDiv.layout) {
+            Plotly.relayout(myDiv, { width: newWidth, height: plotAreaHeight() * 0.95 });
+        }
+    }
+
+    $toggle.on('click', function () {
+        $sidebar.toggleClass('unpinned');
+        var unpinned = $sidebar.hasClass('unpinned');
+        if (!unpinned) { $sidebar.removeClass('hovered'); }
+        $toggle.attr('title', unpinned ? 'Pin sidebar' : 'Unpin sidebar');
+        setTimeout(resizePlot, TRANSITION_MS);
+    });
+
+    $sidebar.on('mouseenter', function () {
+        if ($sidebar.hasClass('unpinned')) {
+            $sidebar.addClass('hovered');
+            setTimeout(resizePlot, TRANSITION_MS);
+        }
+    });
+
+    $sidebar.on('mouseleave', function () {
+        if ($sidebar.hasClass('unpinned')) {
+            $sidebar.removeClass('hovered');
+            setTimeout(resizePlot, TRANSITION_MS);
+        }
+    });
+
+    $(window).on('resize', resizePlot);
+});
+
+
+// implement top bar pin/unpin logic
+$(document).ready(function () {
+    var TRANSITION_MS = 260;
+    var $bar    = $('#dateRangeBar');
+    var $toggle = $('#dateRangeBarToggle');
+
+    function resizePlotHeight() {
+        if (myDiv && myDiv.layout) {
+            Plotly.relayout(myDiv, { height: plotAreaHeight() * 0.95 });
+        }
+    }
+
+    $toggle.on('click', function (e) {
+        e.stopPropagation();
+        $bar.toggleClass('unpinned');
+        var unpinned = $bar.hasClass('unpinned');
+        if (!unpinned) { $bar.removeClass('hovered'); }
+        $toggle.attr('title', unpinned ? 'Pin top bar' : 'Unpin top bar');
+        setTimeout(resizePlotHeight, TRANSITION_MS);
+    });
+
+    $bar.on('mouseenter', function () {
+        if ($bar.hasClass('unpinned')) {
+            $bar.addClass('hovered');
+            setTimeout(resizePlotHeight, TRANSITION_MS);
+        }
+    });
+
+    $bar.on('mouseleave', function () {
+        if ($bar.hasClass('unpinned')) {
+            $bar.removeClass('hovered');
+            setTimeout(resizePlotHeight, TRANSITION_MS);
+        }
+    });
+});
+
+
+// implement chart tool buttons logic
+$(document).ready(function () {
+    function setDragMode(mode) {
+        document.getElementById('toolZoom').classList.toggle('active', mode === 'zoom');
+        document.getElementById('toolPan').classList.toggle('active', mode === 'pan');
+        if (myDiv && myDiv.layout) { Plotly.relayout(myDiv, {dragmode: mode}); }
+    }
+
+    function setHoverMode(mode) {
+        document.getElementById('toolHoverClosest').classList.toggle('active', mode === 'closest');
+        document.getElementById('toolHoverCompare').classList.toggle('active', mode === 'x');
+        if (myDiv && myDiv.layout) { Plotly.relayout(myDiv, {hovermode: mode}); }
+    }
+
+    document.getElementById('toolZoom').addEventListener('click', function () { setDragMode('zoom'); });
+    document.getElementById('toolPan').addEventListener('click', function () { setDragMode('pan'); });
+
+    document.getElementById('toolZoomIn').addEventListener('click', function () {
+        if (!myDiv || !myDiv.layout) return;
+        var ms0 = viewerVars.start.getTime(), ms1 = viewerVars.end.getTime();
+        var mid = (ms0 + ms1) / 2, half = (ms1 - ms0) / 4;
+        Plotly.relayout(myDiv, {'xaxis.range[0]': mid - half, 'xaxis.range[1]': mid + half});
+    });
+
+    document.getElementById('toolZoomOut').addEventListener('click', function () {
+        if (!myDiv || !myDiv.layout) return;
+        var ms0 = viewerVars.start.getTime(), ms1 = viewerVars.end.getTime();
+        var mid = (ms0 + ms1) / 2, half = (ms1 - ms0);
+        Plotly.relayout(myDiv, {'xaxis.range[0]': mid - half, 'xaxis.range[1]': mid + half});
+    });
+
+    document.getElementById('toolReset').addEventListener('click', function () {
+        if (!myDiv || !myDiv.layout) return;
+        Plotly.relayout(myDiv, {'xaxis.autorange': true});
+    });
+
+    document.getElementById('toolHoverClosest').addEventListener('click', function () { setHoverMode('closest'); });
+    document.getElementById('toolHoverCompare').addEventListener('click', function () { setHoverMode('x'); });
+
+    document.getElementById('toolSpikeLines').addEventListener('click', function () {
+        if (!myDiv || !myDiv.layout) return;
+        var on = !this.classList.contains('active');
+        this.classList.toggle('active', on);
+        Plotly.relayout(myDiv, {spikedistance: on ? 200 : -1});
+    });
+
+    document.getElementById('toolSavePng').addEventListener('click', function () {
+        if (!myDiv) return;
+        Plotly.downloadImage(myDiv, {format: 'png', filename: 'archiver-plot'});
+    });
+});
+
+})();
+
+
 viewerVars.relativeDateRegex = /^([-+]{0,1})(\d+)([smhdwMQy]{1})$/; // Get these from moment.js Manipulate shorthand.
+
 
 function parseRelativeDate(relDate) {
 	var parts = viewerVars.relativeDateRegex.exec(relDate);
@@ -273,6 +634,7 @@ function processChangesOnXAxis(eventdata) {
 			viewerVars.start = moment(eventdata['xaxis2.range[0]']).toDate();
 			viewerVars.end = moment(eventdata['xaxis2.range[1]']).toDate();
 		}
+		syncDateBar();
 
 		if(viewerVars.currentBinningOperator.startsWith('errorbar')) {
 			viewerVars.queryStart = viewerVars.start;
@@ -294,7 +656,7 @@ function processChangesOnXAxis(eventdata) {
 			layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
 			layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 			layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-			layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
+			//layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
 			Plotly.relayout(myDiv, layoutChanges);
 			viewerVars.liveModeTimer = setInterval(liveModeTick, 1*1000);
 		} else {
@@ -310,7 +672,7 @@ function processChangesOnXAxis(eventdata) {
 				layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
 				layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 				layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-				layoutChanges.title = 'EPICS Archiver Appliance Viewer (static mode)';
+				//layoutChanges.title = 'EPICS Archiver Appliance Viewer (static mode)';
 				Plotly.relayout(myDiv, layoutChanges);
 			}
 		}
@@ -471,11 +833,13 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 			} // Close the switch
 		}
 
-		if(!('layout' in myDiv)) { // This means we are creating the plotly object for the first time...
+		if(viewerVars.pvs.length == 1 || !('layout' in myDiv)) { // This means we are creating the plotly object for the first time...
 			var layout = {
-					title: 'EPICS Archiver Appliance Viewer (static mode)',
+					//title: 'EPICS Archiver Appliance Viewer (static mode)',
+					title: '',
                     width: window.innerWidth,
-					height: window.innerHeight*0.95,
+					//height: plotAreaHeight() * 0.95,
+					height: plotAreaHeight(),
 					showlegend: true,
 					legend: {x: 0, y: 1},
 					xaxis: {type: 'date', rangeselector: viewerVars.selectorOptions,
@@ -494,19 +858,10 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 			Plotly.newPlot('archViewer', traces, layout, plotConfig).then(function() {
 				myDiv.on('plotly_relayout', processChangesOnXAxis);
 				addToolTipsToTraceLegends();
+				syncDateBar();
 			});
 
-			// click on Live button 
-			$('.rangeselector').on('click', 'g', function(event) {
-                if (viewerVars.currentButton == "Live") {
-					showAdvancedViewModal();
-				}
-            });
-			
-			// memorize current button
-			$('.rangeselector > g').on( "mouseenter", function(event) {
-				viewerVars.currentButton = event.currentTarget.lastChild.innerHTML;
-            });
+			renderRangeButtons();
 
 
 		} else { // We have already created the plotly object; use add/delete API's
@@ -525,6 +880,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 				newTraces.push(viewerVars.pvData[pvName].trace);
 				newTraceIndices.push(viewerVars.pvData[pvName].traceIndex);
 			}
+
 			switch(xAxisChangeType) {
 				case "LeftPan":
 					console.log("Left panning " + updateIndices);
@@ -573,70 +929,11 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 	}).fail(function() { console.log("Failed to get data from the server"); });;
 }
 
-// The modebar is specified in the plotConfig. Use icons from font-awesome to create our modebar buttons.
 function generatePlotConfig() {
 	let bPhone = (window.screen.availHeight > window.screen.availWidth);
-	let newModeBarButtons = [];
-	newModeBarButtons.push({ name: 'Start/End',
-		icon: viewerVars.icons['regular/calendar-alt'],
-		click: function() {
-			$("#dialog_startTime").val(moment(viewerVars.start).format("YYYY/MM/DD HH:mm:ss"));
-			$("#dialog_endTime").val(moment(viewerVars.end).format("YYYY/MM/DD HH:mm:ss"));
-			$('#startEndTimeModal').modal('show');
-		}});
-	if (viewerVars.plotType == viewerVars.plotTypeEnum.SCATTER_2D && !bPhone) {
-		newModeBarButtons.push({ name: 'Add PVs',
-			icon: viewerVars.icons['solid/search'],
-			click: function() { $('#searchAndAddPVsModal').modal('show'); }
-		});
-	}
-	if (!bPhone) {
-		newModeBarButtons.push({ name: 'Show Data',
-			icon: viewerVars.icons['solid/save'],
-			click: showChartDataAsText
-		});
-	}
-	newModeBarButtons.push({ name: 'Export as CSV',
-		icon: viewerVars.icons['solid/download'],
-		click: exportToCSV
-	});
-	if (!bPhone) {
-		newModeBarButtons.push({ name: 'Link to current',
-			icon: viewerVars.icons['solid/link'],
-			click: showLinkToCurrentView
-		});
-	}
-    if(viewerVars.siteSupportsPostToElog) {
-        newModeBarButtons.push({ name: 'Post to elog',
-    		icon: viewerVars.icons['solid/share'],
-    		click: showElogModal
-    	});
-    }
-	if (!bPhone) {
-	    newModeBarButtons.push({ name: 'Y Axes ranges',
-			icon: viewerVars.icons['solid/text-height'],
-			click: showYAxesRangeModal
-		});
-	}
-	if (!bPhone) {
-	    newModeBarButtons.push({ name: 'Remove PVs',
-			icon: viewerVars.icons['solid/trash-alt'],
-			click: showRemovePVsModal
-		});
-	}	
-	if (!bPhone) {
-		newModeBarButtons.push({ name: 'Help',
-			icon: viewerVars.icons['regular/question-circle'],
-			click: showHelp
-		});
-	}
-
-
-	// Add mode bar buttons for start+end time etc
 	let plotConfig = {
-			displaylogo: false,
-			modeBarButtonsToAdd: newModeBarButtons,
-			modeBarButtonsToRemove: bPhone ? ['sendDataToCloud', 'toggleSpikelines', 'toImage', 'toggleHover', 'hoverClosestCartesian', 'hoverCompareCartesian'] : ['sendDataToCloud']
+		displaylogo: false,
+		displayModeBar: false
 	};
 	return plotConfig;
 }
@@ -723,8 +1020,8 @@ function process3DPlot(pvName, data) {
 		} else { // Plotly object does not exist.
 			viewerVars.plotType = viewerVars.plotTypeEnum.ANIMATE_3D;
 			var layout = {
-				title: 'EPICS Archiver Appliance Viewer',
-				height: window.innerHeight * 0.95,
+				//title: 'EPICS Archiver Appliance Viewer',
+				height: plotAreaHeight() * 0.95,
 				showlegend: true,
 				legend: {x: 0, y: 1},
 				xaxis: {type: 'linear', autorange: true},
@@ -807,12 +1104,86 @@ function liveModeTick() { // Timer function for the live mode tick...
 	layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 	layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
 	layoutChanges.xaxis.title = getXAxisTitle();
-	layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
+	//layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
 	Plotly.relayout(myDiv, layoutChanges);
 
 	fetchDataFromServerAndPlot("ReplaceTraces");
+	syncDateBar();
 }
 
+
+function renderRangeButtons() {
+    var container = document.getElementById('rangeButtons');
+    if (!container) return;
+    container.innerHTML = '';
+    viewerVars.selectorOptions.buttons.forEach(function(btn) {
+        var el = document.createElement('button');
+        var isLive = (btn.stepmode === 'forward');
+        el.className = 'range-btn' + (isLive ? ' range-btn-live' : '') + (btn.label === viewerVars.currentButton ? ' active' : '');
+        el.textContent = btn.label;
+        el.title = btn.label;
+        el.addEventListener('click', function() { handleRangeButtonClick(btn, el); });
+        container.appendChild(el);
+    });
+}
+
+
+function handleRangeButtonClick(btn, buttonEl) {
+    document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
+    buttonEl.classList.add('active');
+    viewerVars.currentButton = btn.label;
+
+    if (btn.stepmode === 'forward') {
+        // Live mode
+        if (viewerVars.liveModeTimer != null) clearInterval(viewerVars.liveModeTimer);
+        var liveCount = calculateLiveCount();
+        var now = new Date();
+        viewerVars.end = now;
+        viewerVars.start = new Date(now.getTime() - liveCount);
+        viewerVars.queryStart = viewerVars.start;
+        viewerVars.queryEnd = viewerVars.end;
+        syncDateBar();
+        if (myDiv.layout) {
+            var lc = { xaxis: { autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()], domain: myDiv.layout.xaxis.domain } };
+            //lc.title = 'EPICS Archiver Appliance Viewer (live mode)';
+            Plotly.relayout(myDiv, lc);
+        }
+        fetchDataFromServerAndPlot("ReplaceTraces");
+        viewerVars.liveModeTimer = setInterval(liveModeTick, 1000);
+        showAdvancedViewModal();
+        return;
+    }
+
+    if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
+
+    var end = new Date();
+    var start = (btn.stepmode === 'todate')
+        ? moment().startOf(btn.step).toDate()
+        : moment().subtract(btn.count, btn.step).toDate();
+
+    viewerVars.start = start;
+    viewerVars.end = end;
+    viewerVars.queryStart = start;
+    viewerVars.queryEnd = end;
+    syncDateBar();
+
+    if (!myDiv.layout) return;
+    if (viewerVars.plotType === viewerVars.plotTypeEnum.SCATTER_2D) {
+        Plotly.relayout(myDiv, { xaxis: { autorange: false, range: [start.getTime(), end.getTime()], domain: myDiv.layout.xaxis.domain } });
+    } else {
+        Plotly.relayout(myDiv, { xaxis2: { autorange: false, range: [start.getTime(), end.getTime()], domain: myDiv.layout.xaxis2.domain, anchor: 'y2' } });
+    }
+    fetchDataFromServerAndPlot("ReplaceTraces");
+}
+
+function syncDateBar() {
+    if (viewerVars.start) {
+        $("#dialog_startTime").val(moment(viewerVars.start).format("YYYY/MM/DD HH:mm:ss"));
+    }
+    if (viewerVars.end) {
+        $("#dialog_endTime").val(moment(viewerVars.end).format("YYYY/MM/DD HH:mm:ss"));
+    }
+}
 
 // User selected a start and end time...
 function startAndEndTimeSelected() {
@@ -862,6 +1233,34 @@ function searchForPVsMatchingPattern() {
 		}
 	});
 }
+
+
+function toggleFullscreen() {
+    var el = document.getElementById('appContainer');
+
+    if (!document.fullscreenElement) {
+        // save current sidebar state before collapsing it
+        viewerVars.sidebarWasUnpinned = $('#pvSidebar').hasClass('unpinned');
+        $('#pvSidebar').addClass('unpinned').removeClass('hovered');
+        el.requestFullscreen()
+            .then(function () {
+                Plotly.relayout(myDiv, {
+                    autosize: true,
+                    height: window.screen.height * 0.95
+                });
+            });
+    } else {
+        document.exitFullscreen()
+            .then(function () {
+                Plotly.relayout(myDiv, {
+                    autosize: true,
+                    height: plotAreaHeight() * 0.95
+                });
+            });
+    }
+}
+
+
 
 function addSelectedSearchPVs(e) {
 	let selectedPVs = [];
@@ -1230,9 +1629,7 @@ $(document).ready( function() {
 	$.getJSON("lib/fapaths.json").done(function (icons) {
 		viewerVars.icons = icons;
 		parseURLParameters();
-		if (viewerVars.pvs.length == 0) {
-			$('#searchAndAddPVsModal').modal('show');
-		} else {
+		if (viewerVars.pvs.length != 0) {
 			fetchDataFromServerAndPlot("NewPlot");
 		}
 	})
@@ -1244,6 +1641,28 @@ $(document).ready( function() {
 			addTraceForNewPVs([ev.originalEvent.clipboardData.getData('text/plain').trim()]);
 		}
 	});
+
+
+# implement fullscreen logic
+document.addEventListener('fullscreenchange', function () {
+    var isFullscreen = !!document.fullscreenElement;
+
+    if (isFullscreen) {
+        $('#pvSidebar').addClass('unpinned').removeClass('hovered');
+    } else {
+        // restore to whatever state it was in before fullscreen
+        if (viewerVars.sidebarWasUnpinned) {
+            $('#pvSidebar').addClass('unpinned');
+        } else {
+            $('#pvSidebar').removeClass('unpinned hovered');
+        }
+    }
+
+    Plotly.relayout(myDiv, {
+        autosize: true,
+        height: (isFullscreen ? window.screen.height : plotAreaHeight()) * 0.95
+    });
+});
 
 
 	// There is a big SVG drag area over much of the plot; so we do this to determine if the user has clicked on some plot element.
