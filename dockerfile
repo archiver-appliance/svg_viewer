@@ -1,0 +1,19 @@
+
+FROM python:3.12-slim
+
+
+WORKDIR /app
+
+COPY lib/ ./lib/
+
+COPY archViewer.html .
+
+COPY archViewer.js .
+
+COPY viewerProxy.py .
+
+COPY launch.sh .
+
+
+CMD ["python3", "viewerProxy.py", "8080", "http://skybreweru.cslab.esss.lu.se:17668/retrieval"]
+
