@@ -329,6 +329,8 @@ function highlightTrace(pvName) {
         }, 800);
     };
 
+    viewerVars.renderSelectedList = renderSelectedList;
+
     // Initial hint
     setStatus('0 results');
     renderSelectedList();
@@ -782,6 +784,12 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 			if(isWaveform) { // Escape hatch for waveforms...
 				if(viewerVars.pvs.length > 1) {
 					alert("For now, you can only plot one waveform at a time");
+
+					// remove selected PV from renderSelectedList given that it is not possible to display it
+					var idx = viewerVars.pvs.indexOf(pvName);
+					if(idx >= 0) { viewerVars.pvs.splice(idx, 1); }
+					delete viewerVars.pvData[pvName];
+					if(viewerVars.renderSelectedList) { viewerVars.renderSelectedList(); }
 					return;
 				}
 				return process3DPlot(pvName, data);
