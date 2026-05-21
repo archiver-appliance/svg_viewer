@@ -629,3 +629,11 @@ body {
     color: var(--clr-live);
     border-color: var(--clr-live);
 }
+
+.action-btn:disabled,
+#rangeButtons .range-btn:disabled,
+.date-range-apply:disabled,
+.date-range-input:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}

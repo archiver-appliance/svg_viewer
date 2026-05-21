@@ -156,10 +156,10 @@ function plotAreaHeight() {
 			document.getElementById('pvSelectAll').disabled = true;
 			document.getElementById('pvUnselectAll').disabled = true;
 			document.getElementById('pvRemove').disabled = true;
-			updatePlotVisibility();
+			updateVisibility();
             return;
         }
-        updatePlotVisibility();
+        updateVisibility();
 		document.getElementById('pvSelectAll').disabled = false;
 		document.getElementById('pvUnselectAll').disabled = false;
 		document.getElementById('pvRemove').disabled = true;
@@ -193,8 +193,12 @@ function plotAreaHeight() {
         document.getElementById('pvRemove').disabled = !anyChecked;
     }
 
-    function updatePlotVisibility() {
-        myDiv.style.display = viewerVars.pvs.length ? '' : 'none';
+    function updateVisibility() {
+        var hasPVs = viewerVars.pvs.length > 0;
+        myDiv.style.display = hasPVs ? '' : 'none';
+        document.querySelectorAll('#dateRangeBar button:not(#dateRangeBarToggle), #dateRangeBar input').forEach(function(el) {
+            el.disabled = !hasPVs;
+        });
     }
 
     document.getElementById('pvSelectAll').addEventListener('click', function () {
@@ -330,6 +334,7 @@ function highlightTrace(pvName) {
     };
 
     viewerVars.renderSelectedList = renderSelectedList;
+    viewerVars.updateVisibility = updateVisibility;
 
     // Initial hint
     setStatus('0 results');
@@ -1133,6 +1138,7 @@ function renderRangeButtons() {
         el.addEventListener('click', function() { handleRangeButtonClick(btn, el); });
         container.appendChild(el);
     });
+    if(viewerVars.updateVisibility) { viewerVars.updateVisibility(); }
 }
 
 
