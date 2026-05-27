@@ -1,0 +1,24 @@
+{
+  "name": "svg_viewer",
+  "version": "1.0.0",
+  "description": "This is a web based viewer for the EPICS Archiver Appliance that uses SVG instead of Canvas with the potential to use WebGL in the future.",
+  "main": "archViewer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.esss.lu.se:ics-software/svg_viewer.git"
+  },
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "bootstrap": "3.3.7",
+    "eonasdan-bootstrap-datetimepicker": "4.17.49",
+    "jquery": "3.1.0",
+    "lodash": "4.17.10",
+    "mustache": "3.0.0",
+    "noty": "3.1.4",
+    "plotly.js-dist-min": "2.35.2"
+  }
+}
