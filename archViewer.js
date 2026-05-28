@@ -1640,7 +1640,7 @@ function calculateLiveCount() {
 }
 
 $(document).ready( function() {
-	$.getJSON("lib/fapaths.json").done(function (icons) {
+	$.getJSON("fapaths.json").done(function (icons) {
 		viewerVars.icons = icons;
 		parseURLParameters();
 		if (viewerVars.pvs.length != 0) {
