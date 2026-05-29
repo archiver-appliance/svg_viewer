@@ -1143,6 +1143,14 @@ function renderRangeButtons() {
 
 
 function handleRangeButtonClick(btn, buttonEl) {
+    if (btn.stepmode === 'forward' && viewerVars.liveModeTimer != null) {
+        clearInterval(viewerVars.liveModeTimer);
+        viewerVars.liveModeTimer = null;
+        buttonEl.classList.remove('active');
+        viewerVars.currentButton = '';
+        return;
+    }
+
     document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
     buttonEl.classList.add('active');
     viewerVars.currentButton = btn.label;

@@ -22,9 +22,9 @@
     --clr-danger-border:  #3a1800;
     --clr-danger-bg:      #2a1200;
 
-    --clr-live:           #4caf50;
-    --clr-live-border:    #1a3a1a;
-    --clr-live-bg:        #001a00;
+    --clr-live-active-bg:     #c0392b;
+    --clr-live-active-text:   #ffffff;
+    --clr-live-active-border: #922b21;
 }
 
 
@@ -614,20 +614,10 @@ body {
     border-color: var(--clr-accent);
 }
 
-#rangeButtons .range-btn.range-btn-live {
-    color: var(--clr-live);
-    border-color: var(--clr-live-border);
-}
-
-#rangeButtons .range-btn.range-btn-live:hover {
-    background: var(--clr-live-bg);
-    border-color: var(--clr-live);
-}
-
 #rangeButtons .range-btn.range-btn-live.active {
-    background: var(--clr-live-bg);
-    color: var(--clr-live);
-    border-color: var(--clr-live);
+    background: var(--clr-live-active-bg);
+    color: var(--clr-live-active-text);
+    border-color: var(--clr-live-active-border);
 }
 
 .action-btn:disabled,
