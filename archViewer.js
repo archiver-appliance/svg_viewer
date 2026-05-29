@@ -1134,7 +1134,7 @@ function renderRangeButtons() {
         var isLive = (btn.stepmode === 'forward');
         el.className = 'range-btn' + (isLive ? ' range-btn-live' : '') + (btn.label === viewerVars.currentButton ? ' active' : '');
         el.textContent = btn.label;
-        el.title = btn.label;
+        el.title = isLive ? 'Toggle live PV display on/off' : btn.label;
         el.addEventListener('click', function() { handleRangeButtonClick(btn, el); });
         container.appendChild(el);
     });

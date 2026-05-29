@@ -5,7 +5,8 @@
     --clr-bg-deep:        #0d0f11;
     --clr-bg-mid:         #1c2026;
     --clr-bg-mid-hover:   #252b33;
-    --clr-bg-sidebar:     #666A6B;
+    /*--clr-bg-sidebar:     #666A6B;*/
+    --clr-bg-sidebar:     #999999;
     --clr-border:         #2a2e33;
     --clr-border-hover:   #3a4049;
 
@@ -15,7 +16,8 @@
     --clr-active-bg-hover:#201900;
 
     --clr-text:           #c8d0d8;
-    --clr-text-dim:       #7a8694;
+    /*--clr-text-dim:       #7a8694;*/
+    --clr-text-dim:       #eeeeee;
     --clr-text-muted:     #454d57;
 
     --clr-danger:         #c0440a;
@@ -23,7 +25,8 @@
     --clr-danger-bg:      #2a1200;
 
     --clr-live-active-bg:     #c0392b;
-    --clr-live-active-text:   #ffffff;
+    /*--clr-live-active-text:   #ffffff;*/
+    --clr-live-active-text:   #eeeeee;
     --clr-live-active-border: #922b21;
 }
 
@@ -321,15 +324,14 @@ body {
 #pvSelectedList .pv-item {
     display: flex;
     align-items: center;
-    color: var(--clr-accent);
-    border-left-color: var(--clr-accent);
-    background: var(--clr-active-bg);
+    color: var(--clr-text-dim);
+    border-left-color: var(--clr-border-hover);
 }
 
 #pvSelectedList .pv-item:hover {
-    background: var(--clr-active-bg-hover);
-    color: var(--clr-accent);
-    border-left-color: var(--clr-accent);
+    background: var(--clr-bg-mid);
+    color: var(--clr-text);
+    border-left-color: var(--clr-border-hover);
 }
 
 #pvSelectedList .pv-item-name {
