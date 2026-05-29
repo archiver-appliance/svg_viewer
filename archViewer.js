@@ -1209,6 +1209,10 @@ function syncDateBar() {
 
 // User selected a start and end time...
 function startAndEndTimeSelected() {
+	if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
+	document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
+	viewerVars.currentButton = '';
+
 	viewerVars.start = moment($("#dialog_startTime").val(), "YYYY/MM/DD HH:mm:ss").toDate();
 	viewerVars.end   = moment($("#dialog_endTime").val(), "YYYY/MM/DD HH:mm:ss").toDate();
 	viewerVars.queryStart = viewerVars.start;
