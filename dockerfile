@@ -4,11 +4,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY lib/ ./lib/
+COPY node_modules/ ./node_modules/
 
 COPY archViewer.html .
 
 COPY archViewer.js .
+
+COPY fapaths.json .
 
 COPY viewerProxy.py .
 
