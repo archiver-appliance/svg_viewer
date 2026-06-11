@@ -524,27 +524,6 @@ body {
     align-items: center;
 }
 
-.date-range-apply {
-    background: var(--clr-accent);
-    border: none;
-    border-radius: 3px;
-    color: var(--clr-bg-deep);
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    cursor: pointer;
-    transition: background 0.15s;
-    margin-left: 4px;
-    flex-shrink: 0;
-}
-
-.date-range-apply:hover {
-    background: var(--clr-accent-dim);
-}
-
 /* ── Toolbar button groups ────────────────────────────────── */
 #rangeButtons,
 #chartTools,
@@ -624,7 +603,6 @@ body {
 
 .action-btn:disabled,
 #rangeButtons .range-btn:disabled,
-.date-range-apply:disabled,
 .date-range-input:disabled {
     opacity: 0.35;
     cursor: not-allowed;

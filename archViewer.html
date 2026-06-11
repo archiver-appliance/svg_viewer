@@ -95,7 +95,6 @@
                 <span class="glyphicon glyphicon-calendar"></span>
             </span>
         </div>
-        <button id="applyDateRange" class="date-range-apply">Apply</button>
         <div id="rangeButtons"></div>
         <div id="chartTools">
             <button class="action-btn active" id="toolZoom" title="Zoom">
@@ -187,7 +186,20 @@
                 $('#endTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss", widgetParent: 'body'});
                 $('#startTime').on('dp.show', function () { fixDatepickerPosition($(this)); });
                 $('#endTime').on('dp.show', function () { fixDatepickerPosition($(this)); });
-                document.getElementById('applyDateRange').addEventListener('click', startAndEndTimeSelected);
+                $('#startTime').on('dp.change', startAndEndTimeSelected);
+                $('#endTime').on('dp.change', startAndEndTimeSelected);
+                $('#dialog_startTime').keydown(function(e) {
+                    if (e.keyCode == 13) {
+                        e.preventDefault();
+                        startAndEndTimeSelected();
+                    }
+                });
+                $('#dialog_endTime').keydown(function(e) {
+                    if (e.keyCode == 13) {
+                        e.preventDefault();
+                        startAndEndTimeSelected();
+                    }
+                });
                 renderRangeButtons();
                 document.getElementById('actionShowData').addEventListener('click', showChartDataAsText);
                 document.getElementById('actionExportCSV').addEventListener('click', exportToCSV);
