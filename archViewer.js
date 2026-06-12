@@ -1457,11 +1457,39 @@ function getLinkToCurrentView() {
 }
 
 // URL to what we are currently showing...
-function showLinkToCurrentView() {
+function copyLinkToClipboard() {
     let linkToCurrentView = getLinkToCurrentView();
-	console.log(linkToCurrentView);
-	$("#linkText").val(linkToCurrentView);
-	$('#linkModal').modal('show');
+
+	function notifyCopied(success) {
+		new Noty({
+			type: success ? "success" : "error",
+			timeout: success ? 2500: 5000,
+			text: success ? "Link to current view copied to clipboard" : "Failed to copy link to current view to clipboard"
+		}).show();
+	}
+
+	if (navigator.clipboard) {
+		// modern way to copy to clipboard
+		navigator.clipboard.writeText(linkToCurrentView).then(function() {
+			notifyCopied(true);
+		}, function() {
+			notifyCopied(false);
+		});
+	} else {
+		// old way to copy to clipboard (in case modern way is not supported by the client)
+		let textArea = document.createElement("textarea");
+		textArea.value = linkToCurrentView;
+		textArea.style.position = "fixed";
+		textArea.style.opacity = "0";
+		document.body.appendChild(textArea);
+		textArea.select();
+		try {
+			notifyCopied(document.execCommand("copy"));
+		} catch (err) {
+			notifyCopied(false);
+		}
+		document.body.removeChild(textArea);
+	}
 }
 
 function showHelp() {
