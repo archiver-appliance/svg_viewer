@@ -76,12 +76,6 @@ text.fixedBinSize tspan:nth-child(2) {
 	max-width: calc(100vw - 210px);
 }
 
-#linkText {
-    margin-left: 1.0em;
-    margin-right: 1.0em;
-    width: calc(100% - 2.0em);
-}
-
 
 
 /* ── Page shell ──────────────────────────────────────────── */
@@ -601,8 +595,36 @@ body {
     border-color: var(--clr-live-active-border);
 }
 
+#rangeButtons .range-btn-select {
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    color: var(--clr-text-dim);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    outline: none;
+}
+
+#rangeButtons .range-btn-select:hover {
+    background: var(--clr-bg-mid-hover);
+    color: var(--clr-text);
+    border-color: var(--clr-border-hover);
+}
+
+#rangeButtons .range-btn-select:focus {
+    border-color: var(--clr-accent);
+}
+
 .action-btn:disabled,
 #rangeButtons .range-btn:disabled,
+#rangeButtons .range-btn-select:disabled,
 .date-range-input:disabled {
     opacity: 0.35;
     cursor: not-allowed;

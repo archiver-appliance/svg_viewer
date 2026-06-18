@@ -196,7 +196,7 @@ function plotAreaHeight() {
     function updateVisibility() {
         var hasPVs = viewerVars.pvs.length > 0;
         myDiv.style.display = hasPVs ? '' : 'none';
-        document.querySelectorAll('#dateRangeBar button:not(#dateRangeBarToggle), #dateRangeBar input').forEach(function(el) {
+        document.querySelectorAll('#dateRangeBar button:not(#dateRangeBarToggle), #dateRangeBar input, #dateRangeBar select').forEach(function(el) {
             el.disabled = !hasPVs;
         });
     }
@@ -1125,20 +1125,82 @@ function liveModeTick() { // Timer function for the live mode tick...
 }
 
 
+// Labels shown as standalone buttons; everything else (except Live) goes into the dropdown.
+var inlineRangeButtonLabels = ['5m', '1d', '6M'];
+
+
 function renderRangeButtons() {
     var container = document.getElementById('rangeButtons');
     if (!container) return;
     container.innerHTML = '';
+
+    var dropdownButtons = [];
+    var liveButton = null;
+
     viewerVars.selectorOptions.buttons.forEach(function(btn) {
-        var el = document.createElement('button');
-        var isLive = (btn.stepmode === 'forward');
-        el.className = 'range-btn' + (isLive ? ' range-btn-live' : '') + (btn.label === viewerVars.currentButton ? ' active' : '');
-        el.textContent = btn.label;
-        el.title = isLive ? 'Toggle live PV display on/off' : btn.label;
-        el.addEventListener('click', function() { handleRangeButtonClick(btn, el); });
-        container.appendChild(el);
+        if (btn.stepmode === 'forward') {
+            liveButton = btn;
+        } else if (inlineRangeButtonLabels.indexOf(btn.label) === -1) {
+            dropdownButtons.push(btn);
+        }
     });
+
+    viewerVars.selectorOptions.buttons.forEach(function(btn) {
+        if (btn.stepmode === 'forward' || inlineRangeButtonLabels.indexOf(btn.label) === -1) return;
+        appendRangeButton(container, btn, false);
+    });
+
+    if (dropdownButtons.length) {
+        container.appendChild(buildRangeDropdown(dropdownButtons));
+    }
+
+    if (liveButton) {
+        appendRangeButton(container, liveButton, true);
+    }
+
     if(viewerVars.updateVisibility) { viewerVars.updateVisibility(); }
+}
+
+
+function appendRangeButton(container, btn, isLive) {
+    var el = document.createElement('button');
+    el.className = 'range-btn' + (isLive ? ' range-btn-live' : '') + (btn.label === viewerVars.currentButton ? ' active' : '');
+    el.textContent = btn.label;
+    el.title = isLive ? 'Toggle live PV display on/off' : btn.label;
+    el.addEventListener('click', function() { handleRangeButtonClick(btn, el); });
+    container.appendChild(el);
+}
+
+
+function buildRangeDropdown(buttons) {
+    var select = document.createElement('select');
+    select.className = 'range-btn-select';
+    select.title = 'More time ranges';
+
+    var isCurrentInDropdown = buttons.some(function(b) { return b.label === viewerVars.currentButton; });
+
+    var placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'More…';
+    placeholder.disabled = true;
+    placeholder.selected = !isCurrentInDropdown;
+    select.appendChild(placeholder);
+
+    buttons.forEach(function(btn) {
+        var opt = document.createElement('option');
+        opt.value = btn.label;
+        opt.textContent = btn.label;
+        if (btn.label === viewerVars.currentButton) opt.selected = true;
+        select.appendChild(opt);
+    });
+
+    select.addEventListener('change', function() {
+        var chosen = buttons.find(function(b) { return b.label === select.value; });
+        if (!chosen) return;
+        handleRangeButtonClick(chosen, select);
+    });
+
+    return select;
 }
 
 
@@ -1152,7 +1214,9 @@ function handleRangeButtonClick(btn, buttonEl) {
     }
 
     document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
-    buttonEl.classList.add('active');
+    var dropdown = document.querySelector('#rangeButtons .range-btn-select');
+    if (dropdown && buttonEl !== dropdown) dropdown.value = '';
+    if (buttonEl.classList.contains('range-btn')) buttonEl.classList.add('active');
     viewerVars.currentButton = btn.label;
 
     if (btn.stepmode === 'forward') {
@@ -1211,6 +1275,8 @@ function syncDateBar() {
 function startAndEndTimeSelected() {
 	if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
 	document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
+	var dropdown = document.querySelector('#rangeButtons .range-btn-select');
+	if (dropdown) dropdown.value = '';
 	viewerVars.currentButton = '';
 
 	viewerVars.start = moment($("#dialog_startTime").val(), "YYYY/MM/DD HH:mm:ss").toDate();
