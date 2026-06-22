@@ -1406,18 +1406,6 @@ function getCurrentDataAsDict() {
 	}
 }
 
-// Popup a modal with the data for the current plot.
-function showChartDataAsText() {
-	let d = getCurrentDataAsDict();
-	let names = d[0];
-	let tbl = d[1];
-	let htmlContent = "<table id='showDataTable' class='table table-striped table-bordered table-condensed'><tr><th>Time</th><th>" + names.join("</th><th>") + "</th></tr>\n";
-	Object.keys(tbl).sort().forEach(function(key) { htmlContent += "<tr><td>" + moment(key).format("YYYY/MM/DD HH:mm:ss.SSS") + "</td><td>" + tbl[key].join("</td><td>") + "</td></tr>\n"; });
-	$("#showDataTableDiv").empty();
-	$("#showDataTableDiv").append(htmlContent);
-	$('#showDataModal').modal('show');
-}
-
 function exportToCSV() {
 	let d = getCurrentDataAsDict();
 	let names = d[0];

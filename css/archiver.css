@@ -43,15 +43,6 @@ text.fixedBinSize tspan:nth-child(2) {
 }
 
 
-#showDataModal div.modal-body {
-	overflow-y: auto;
-	overflow-x: auto;
-	max-height: calc(100vh - 210px);
-	max-width: calc(100vw - 210px);
-}
-
-
-
 /* ── Page shell ──────────────────────────────────────────── */
 body {
     display: flex;
