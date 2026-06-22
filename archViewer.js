@@ -47,12 +47,6 @@ viewerVars.icons = {}
 // We take a snapshot of the gd before showing the comment modal. This is stored here
 viewerVars.currentSnapshot = null;
 viewerVars.currentButton = '';
-
-// last interval choice
-let lastInterval = null;
-// last time unit choice
-let lastUnit = null;
-
 // This is one of the integration points with the server.
 // This should default to a path relative location that works from the appliance UI.
 // To develop/debug, override this to a absolute URL of the server with the data you are going to use for debugging/developing.
@@ -1316,26 +1310,6 @@ function startAndEndTimeSelected() {
 	fetchDataFromServerAndPlot("ReplaceTraces");
 }
 
-// User typed a pattern, we search for PV's matching this pattern.
-function searchForPVsMatchingPattern() {
-	let pattern = $("#pvNamePattern").val();
-	console.log("Search and add PVs for pattern " + pattern);
-	let list = $("#pvNameSearchMatchingList");
-	list.empty();
-	$("#pvNameSearchMatchingError").empty();
-	$.getJSON( viewerVars.serverURL + "/../bpl/getMatchingPVs?limit=10000&pv=" + pattern, function(matchingPVs){
-		if(matchingPVs.length > 1) {
-			matchingPVs.forEach(function(matchingPV) { list.append('<li class="list-group-item">' + matchingPV + '</li>') });
-			$("#pvNameSearchMatchingList li").click(function() { $(this).toggleClass('list-group-item-info'); });
-		} else if(matchingPVs.length == 1) {
-			$('#searchAndAddPVsModal').modal('hide');
-			addTraceForNewPVs(matchingPVs);
-			return;
-		} else {
-			$("#pvNameSearchMatchingError").html("No PV names matched your search. Search using GLOB patterns, for example, QUAD:*:BDES");
-		}
-	});
-}
 
 
 function toggleFullscreen() {
@@ -1364,17 +1338,6 @@ function toggleFullscreen() {
 }
 
 
-
-function addSelectedSearchPVs(e) {
-	let selectedPVs = [];
-	$("#pvNameSearchMatchingList li.list-group-item-info").each(function(index) { selectedPVs.push($(this).text())});
-	if(selectedPVs.length > 0) {
-		$('#searchAndAddPVsModal').modal('hide');
-		addTraceForNewPVs(selectedPVs);
-		return true;
-	}
-	return false;
-}
 
 function fixBinSize() {
 	let binSize = parseInt($("#binSizeInput").val());

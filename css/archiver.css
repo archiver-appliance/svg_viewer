@@ -38,34 +38,8 @@
 	height: 100%;
 }
 
-#contextMenu {
-  position: absolute;
-  display:none;
-}
-
-.nocheckmark {
-	display: none;
-}
-
-.checkmark {
-	display: inline;
-	color: olive;
-	padding-left: 0.5em;
-}
-
 text.fixedBinSize tspan:nth-child(2) {
 	fill: orange;
-}
-
-#searchAndAddPVsModal div.modal-body {
-	overflow-y: auto;
-	overflow-x: auto;
-	max-height: calc(100vh - 210px);
-	max-width: calc(100vw - 210px);
-}
-
-#pvNameSearchMatchingError {
-	color: darkred;
 }
 
 

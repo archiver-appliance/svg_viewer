@@ -240,60 +240,6 @@
 
 </div>
 
-<!--  Search and add PVs  -->
-<div id="searchAndAddPVsModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                       <span aria-hidden="true">&times;</span>
-                       <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="myModalLabel">
-                    Enter a PV Name GLOB pattern
-                </h4>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form class="form-horizontal" role="form">
-                  <div class="form-group">
-                  	<div class='input-group'>
-                	  <span class="input-group-addon">PV Name Pattern:</span>
-                      <input type="text" class="form-control" id="pvNamePattern" placeholder="PV:Name:*"/>
-                      <span class="input-group-addon">
-                      	<span class="glyphicon glyphicon-search" aria-hidden="true" id="pvNameSearchIcon"></span>
-                      </span>
-                      </div>
-                  </div>
-                </form>
-                <div id="pvNameSearchMatchingError"></div>
-                <ul class="list-group" id="pvNameSearchMatchingList">
-                </ul>
-            </div>
-             <div class="modal-footer">
-     			<button type="button" id="pvNameSearchAddBtn" class="btn btn-default">Add</button>
-   			</div>
-        </div>
-    </div>
-    <script type="text/javascript">
-        $(function () {
-            $("#pvNamePattern").keydown(function(e) {
-                if (e.keyCode == 13) {
-                    e.preventDefault();
-                    searchForPVsMatchingPattern();
-                }
-            });
-            $("#pvNameSearchIcon").click(function() {
-            	searchForPVsMatchingPattern();
-            });
-            $("#pvNameSearchAddBtn").on("click", function(){
-                addSelectedSearchPVs();
-            })
-        });
-    </script>
-</div>
-
 <!--  Choose bin size  -->
 <div id="binSizeModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
