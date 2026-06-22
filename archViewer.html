@@ -96,6 +96,15 @@
             </span>
         </div>
         <div id="rangeButtons"></div>
+        <div id="liveControls">
+            <input id="timeInput" type="number" min="1" class="live-interval-input" disabled />
+            <select id="unitInput" class="live-unit-select" disabled>
+                <option value="second">second(s)</option>
+                <option value="minute">minute(s)</option>
+                <option value="hour">hour(s)</option>
+                <option value="day">day(s)</option>
+            </select>
+        </div>
         <div id="chartTools">
             <button class="action-btn active" id="toolZoom" title="Zoom">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -201,6 +210,19 @@
                     }
                 });
                 renderRangeButtons();
+                $('#unitInput').on('change', showAdvancedView);
+                $('#timeInput').on('change', showAdvancedView);
+                $('#timeInput').on('blur', function() {
+                    if (!this.value || parseInt(this.value) < 1) this.value = 1;
+                    showAdvancedView();
+                });
+                $('#timeInput').keydown(function(e) {
+                    if (e.keyCode == 13) {
+                        e.preventDefault();
+                        if (!this.value || parseInt(this.value) < 1) this.value = 1;
+                        showAdvancedView();
+                    }
+                });
                 document.getElementById('actionShowData').addEventListener('click', showChartDataAsText);
                 document.getElementById('actionExportCSV').addEventListener('click', exportToCSV);
                 document.getElementById('actionLink').addEventListener('click', copyLinkToClipboard);
@@ -473,40 +495,6 @@
         });
     </script>
 </div>
-
-<!--Test advanced view-->
-<div id="advancedViewModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                       <span aria-hidden="true">&times;</span>
-                       <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="myModalLabel">
-                    Select live interval
-                </h4>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form class="form-group">
-                    <div class="input-field">
-                    </div>
-                </form>
-            </div>
-             <div class="modal-footer">
-     			<button type="button" class="btn btn-default" data-dismiss="modal" id="showViewBtn">OK</button>
-   			</div>
-        </div>
-    </div>
-    <script type="text/javascript">
-        $(function () {
-            $('#showViewBtn').on('click', showAdvancedView);
-        });
-    </script>
-</div>
-<!--End test-->
 
 <script type="text/javascript" src="archViewer.js"></script>
 

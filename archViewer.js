@@ -196,7 +196,7 @@ function plotAreaHeight() {
     function updateVisibility() {
         var hasPVs = viewerVars.pvs.length > 0;
         myDiv.style.display = hasPVs ? '' : 'none';
-        document.querySelectorAll('#dateRangeBar button:not(#dateRangeBarToggle), #dateRangeBar input, #dateRangeBar select').forEach(function(el) {
+		document.querySelectorAll('#dateRangeBar button:not(#dateRangeBarToggle), #dateRangeBar input:not(#timeInput), #dateRangeBar select:not(#unitInput)').forEach(function(el) {
             el.disabled = !hasPVs;
         });
     }
@@ -1155,7 +1155,15 @@ function renderRangeButtons() {
     }
 
     if (liveButton) {
-        appendRangeButton(container, liveButton, true);
+        var liveControls = document.getElementById('liveControls');
+        var existingLiveBtn = liveControls.querySelector('.range-btn-live');
+        if (existingLiveBtn) liveControls.removeChild(existingLiveBtn);
+        var liveEl = document.createElement('button');
+        liveEl.className = 'range-btn range-btn-live' + (liveButton.label === viewerVars.currentButton ? ' active' : '');
+        liveEl.textContent = liveButton.label;
+        liveEl.title = 'Toggle live PV display on/off';
+        liveEl.addEventListener('click', function() { handleRangeButtonClick(liveButton, liveEl); });
+        liveControls.insertBefore(liveEl, liveControls.firstChild);
     }
 
     if(viewerVars.updateVisibility) { viewerVars.updateVisibility(); }
@@ -1210,10 +1218,11 @@ function handleRangeButtonClick(btn, buttonEl) {
         viewerVars.liveModeTimer = null;
         buttonEl.classList.remove('active');
         viewerVars.currentButton = '';
+        hideLiveControls();
         return;
     }
 
-    document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('#rangeButtons .range-btn, #liveControls .range-btn').forEach(function(b) { b.classList.remove('active'); });
     var dropdown = document.querySelector('#rangeButtons .range-btn-select');
     if (dropdown && buttonEl !== dropdown) dropdown.value = '';
     if (buttonEl.classList.contains('range-btn')) buttonEl.classList.add('active');
@@ -1236,10 +1245,11 @@ function handleRangeButtonClick(btn, buttonEl) {
         }
         fetchDataFromServerAndPlot("ReplaceTraces");
         viewerVars.liveModeTimer = setInterval(liveModeTick, 1000);
-        showAdvancedViewModal();
+        showLiveControls();
         return;
     }
 
+    hideLiveControls();
     if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
 
     var end = new Date();
@@ -1274,9 +1284,10 @@ function syncDateBar() {
 // User selected a start and end time...
 function startAndEndTimeSelected() {
 	if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
-	document.querySelectorAll('#rangeButtons .range-btn').forEach(function(b) { b.classList.remove('active'); });
+	document.querySelectorAll('#rangeButtons .range-btn, #liveControls .range-btn').forEach(function(b) { b.classList.remove('active'); });
 	var dropdown = document.querySelector('#rangeButtons .range-btn-select');
 	if (dropdown) dropdown.value = '';
+	hideLiveControls();
 	viewerVars.currentButton = '';
 
 	viewerVars.start = moment($("#dialog_startTime").val(), "YYYY/MM/DD HH:mm:ss").toDate();
@@ -1666,42 +1677,19 @@ function removeSelectedPVs() {
 	});
 }
 
-// Advanced view modal
-function showAdvancedViewModal() {
-	let buttonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
-	lastUnit = viewerVars.selectorOptions.buttons[buttonIndex].step;
-	lastInterval = viewerVars.selectorOptions.buttons[buttonIndex].count;
-	let modal = `
-		<div class="row align-items-center">
-			<div class="col-auto">
-				<label for="timeInput"><b>Enter your desired interval:</b></label>
-			</div>
-			<div class="col-auto">
-				<input id="timeInput" name="timeInput" type="number" min="1" value="${lastInterval}" class="form-control" style="width: 110px;" required onblur="validateInput(this)" />
-			</div>
-			<script>
-    			function validateInput(input) {
-					if (input.value < 1) {
-						input.value = 1;
-					}
-				}
-			</script>
-			<div class="col-auto">
-				<label for="timeInput"><b>Select your desired time unit:</b></label>
-			</div>
-			<div class="col-auto">
-				<select class="form-control" id="unitInput" style="width: 110px;">
-					<option value="second" ${lastUnit === 'second' ? 'selected' : ''}>second(s)</option>
-					<option value="minute" ${lastUnit === 'minute' ? 'selected' : ''}>minute(s)</option>
-					<option value="hour" ${lastUnit === 'hour' ? 'selected' : ''}>hour(s)</option>
-					<option value="day" ${lastUnit === 'day' ? 'selected' : ''}>day(s)</option>
-				</select>
-			</div>
-		</div>
-		`;
-	Mustache.parse(modal);
-	$('#advancedViewModal').find('.input-field').empty().append(Mustache.render(modal));
-	$('#advancedViewModal').modal('show');
+function showLiveControls() {
+	var buttonIndex = viewerVars.selectorOptions.buttons.findIndex(b => b.label === "Live");
+	var timeInput = document.getElementById('timeInput');
+	var unitInput = document.getElementById('unitInput');
+	timeInput.value = viewerVars.selectorOptions.buttons[buttonIndex].count;
+	unitInput.value = viewerVars.selectorOptions.buttons[buttonIndex].step;
+	timeInput.disabled = false;
+	unitInput.disabled = false;
+}
+
+function hideLiveControls() {
+	document.getElementById('timeInput').disabled = true;
+	document.getElementById('unitInput').disabled = true;
 }
 
 function showAdvancedView() {
