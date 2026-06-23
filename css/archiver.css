@@ -2,22 +2,19 @@
 :root {
     --font-mono: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
 
-    --clr-bg-deep:        #0d0f11;
-    --clr-bg-mid:         #1c2026;
+    --clr-bg-deep:        #31667D;  /* ok */
+    --clr-bg-mid:         #0094ca20;   /* ok */
     --clr-bg-mid-hover:   #252b33;
-    /*--clr-bg-sidebar:     #666A6B;*/
-    --clr-bg-sidebar:     #999999;
-    --clr-border:         #2a2e33;
+    --clr-bg-sidebar:     #f5f6f8;  /* ok */
+    --clr-border:         #e1e4ea; /* ok */
     --clr-border-hover:   #3a4049;
 
-    --clr-accent:         #f57a03;
-    --clr-accent-dim:     #d96e00;
-    --clr-active-bg:      #1a1500;
-    --clr-active-bg-hover:#201900;
+    --clr-accent:         #017daa;   /* ok */
+    --clr-active-bg:      #0094ca20;   /* ok */
+    --clr-active-bg-hover:#0094ca45;   /* ok */
 
-    --clr-text:           #c8d0d8;
-    /*--clr-text-dim:       #7a8694;*/
-    --clr-text-dim:       #eeeeee;
+    --clr-text:           #017daa;
+    --clr-text-dim:       #293035;   /* ok */
     --clr-text-muted:     #454d57;
 
     --clr-danger:         #c0440a;
@@ -25,7 +22,6 @@
     --clr-danger-bg:      #2a1200;
 
     --clr-live-active-bg:     #c0392b;
-    /*--clr-live-active-text:   #ffffff;*/
     --clr-live-active-text:   #eeeeee;
     --clr-live-active-border: #922b21;
 }
@@ -99,7 +95,7 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--clr-accent);
+    color: #ffffff;
     padding: 0;
     display: flex;
     align-items: center;
@@ -168,7 +164,7 @@ body {
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--clr-accent);
+    color: #ffffff;
     margin-bottom: 8px;
     white-space: nowrap;
     overflow: hidden;
@@ -180,7 +176,7 @@ body {
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
     border-radius: 3px;
-    color: var(--clr-text);
+    color: #ffffff;
     font-family: inherit;
     font-size: 11px;
     padding: 6px 8px;
@@ -193,7 +189,8 @@ body {
 }
 
 #pvSidebar .sidebar-search::placeholder {
-    color: var(--clr-text-muted);
+    color: #ffffff;
+    opacity: 0.35;
 }
 
 #pvSidebar .sidebar-status {
@@ -265,7 +262,7 @@ body {
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--clr-accent);
+    color: #ffffff;
     white-space: nowrap;
 }
 
@@ -315,7 +312,8 @@ body {
     gap: 4px;
     padding: 5px 8px 7px;
     flex-shrink: 0;
-    background: var(--clr-bg-deep);
+    background: #f5f6f8;
+    border-top: 1px solid #e1e4ea;
 }
 
 .sidebar-selected-actions .sidebar-action-btn {
@@ -346,7 +344,7 @@ body {
 }
 
 .sidebar-selected-actions .sidebar-action-btn-danger {
-    color: var(--clr-danger);
+    color: #cccccc;
     border-color: var(--clr-danger-border);
 }
 
@@ -416,7 +414,7 @@ body {
     right: 0;
     background: var(--clr-bg-deep);
     border: none;
-    color: var(--clr-accent);
+    color: #ffffff;
     cursor: pointer;
     padding: 2px 4px;
     display: flex;
@@ -441,7 +439,7 @@ body {
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--clr-accent);
+    color: #ffffff;
     white-space: nowrap;
     margin: 0;
 }
@@ -450,14 +448,14 @@ body {
     width: auto;
     display: flex;
     align-items: stretch;
+    gap: 1px;
 }
 
 .date-range-input {
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
-    border-radius: 3px 0 0 3px;
-    border-right: none;
-    color: var(--clr-text);
+    border-radius: 3px;
+    color: #ffffff;
     font-family: var(--font-mono);
     font-size: 11px;
     padding: 4px 8px;
@@ -472,15 +470,31 @@ body {
 }
 
 .date-range-icon {
-    background: var(--clr-bg-mid);
-    border: 1px solid var(--clr-border);
-    border-left: none;
-    border-radius: 0 3px 3px 0;
-    color: var(--clr-text-muted);
+    background: none;
+    border: none;
+    border-radius: 3px;
+    color: #ffffff;
     padding: 4px 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
+}
+
+#liveControls input,
+#liveControls select {
+    background: var(--clr-bg-mid);
+    border: 1px solid var(--clr-border);
+    border-radius: 3px;
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    outline: none;
+    flex-shrink: 0;
 }
 
 /* ── Toolbar button groups ────────────────────────────────── */
@@ -499,7 +513,7 @@ body {
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
     border-radius: 3px;
-    color: var(--clr-text-dim);
+    color: #ffffff;
     padding: 4px 6px;
     cursor: pointer;
     display: flex;
@@ -530,7 +544,7 @@ body {
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
     border-radius: 3px;
-    color: var(--clr-text-dim);
+    color: #ffffff;
     font-family: var(--font-mono);
     font-size: 9px;
     font-weight: 700;
@@ -564,7 +578,7 @@ body {
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
     border-radius: 3px;
-    color: var(--clr-text-dim);
+    color: #ffffff;
     font-family: var(--font-mono);
     font-size: 9px;
     font-weight: 700;
@@ -590,7 +604,8 @@ body {
 .action-btn:disabled,
 #rangeButtons .range-btn:disabled,
 #rangeButtons .range-btn-select:disabled,
-.date-range-input:disabled {
+.date-range-input:disabled,
+.date-range-input:disabled + .date-range-icon {
     opacity: 0.35;
     cursor: not-allowed;
 }
