@@ -48,12 +48,12 @@
 
 <div id="pvSidebar">
     <div class="sidebar-header">
-        <div class="sidebar-title">Process Variables</div>
+        <div class="sidebar-title">PVs</div>
         <input
             id="pvSidebarSearch"
             class="sidebar-search"
             type="text"
-            placeholder="Search..."
+            placeholder="Search…"
             autocomplete="off"
             spellcheck="false"
         />
@@ -97,10 +97,10 @@
         </div>
         <div id="rangeButtons"></div>
         <div id="liveControls">
-            <input id="timeInput" type="number" min="1" class="live-interval-input" disabled />
+            <input id="timeInput" type="number" min="1" value="7" class="live-interval-input" disabled />
             <select id="unitInput" class="live-unit-select" disabled>
                 <option value="second">second(s)</option>
-                <option value="minute">minute(s)</option>
+                <option value="minute" selected>minute(s)</option>
                 <option value="hour">hour(s)</option>
                 <option value="day">day(s)</option>
             </select>

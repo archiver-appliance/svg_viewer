@@ -87,9 +87,6 @@ body {
 
 /* Toggle button */
 #pvSidebarToggle {
-    position: absolute;
-    top: 8px;
-    right: 6px;
     width: 20px;
     height: 20px;
     background: none;
@@ -102,7 +99,6 @@ body {
     justify-content: center;
     border-radius: 3px;
     transition: background 0.15s;
-    z-index: 10;
     flex-shrink: 0;
 }
 
@@ -121,10 +117,25 @@ body {
     transform: rotate(45deg);
 }
 
-/* When unpinned and not hovered, center the toggle inside the slim strip */
+/* When unpinned and not hovered, hide title+search and center the toggle */
+#pvSidebar.unpinned:not(.hovered) .sidebar-title,
+#pvSidebar.unpinned:not(.hovered) .sidebar-search {
+    display: none;
+}
+
+#pvSidebar.unpinned:not(.hovered) .sidebar-header {
+    position: relative;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 42px;
+}
+
 #pvSidebar.unpinned:not(.hovered) #pvSidebarToggle {
-    right: 50%;
-    transform: translateX(50%);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
 }
 
 /* Hide content when unpinned and not hovered */
@@ -152,11 +163,15 @@ body {
 }
 
 #pvSidebar .sidebar-header {
-    padding: 10px 36px 8px 12px; /* right padding makes room for toggle */
+    padding: 8px 8px 8px 12px;
     border-bottom: 1px solid var(--clr-border);
     background: var(--clr-bg-deep);
-    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
     flex-shrink: 0;
+    position: relative;
 }
 
 #pvSidebar .sidebar-title {
@@ -165,13 +180,13 @@ body {
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #ffffff;
-    margin-bottom: 8px;
     white-space: nowrap;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 #pvSidebar .sidebar-search {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     box-sizing: border-box;
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
@@ -179,7 +194,7 @@ body {
     color: #ffffff;
     font-family: inherit;
     font-size: 11px;
-    padding: 6px 8px;
+    padding: 4px 8px;
     outline: none;
     transition: border-color 0.15s;
 }
@@ -318,7 +333,7 @@ body {
 
 .sidebar-selected-actions .sidebar-action-btn {
     flex: 1;
-    background: var(--clr-bg-mid);
+    background: #ffffff;
     border: 1px solid var(--clr-border);
     border-radius: 3px;
     color: var(--clr-text-dim);
@@ -344,8 +359,8 @@ body {
 }
 
 .sidebar-selected-actions .sidebar-action-btn-danger {
-    color: #cccccc;
-    border-color: var(--clr-danger-border);
+    color: var(--clr-text-dim);
+    border-color: var(--clr-border);
 }
 
 .sidebar-selected-actions .sidebar-action-btn-danger:hover {
@@ -460,7 +475,7 @@ body {
     font-size: 11px;
     padding: 4px 8px;
     outline: none;
-    width: 162px;
+    width: 145px;
     transition: border-color 0.15s;
     height: auto;
 }
@@ -487,14 +502,18 @@ body {
     border-radius: 3px;
     color: #ffffff;
     font-family: var(--font-mono);
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
-    padding: 4px 6px;
+    padding: 4px 8px;
     cursor: pointer;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
     outline: none;
     flex-shrink: 0;
+}
+
+#timeInput {
+    width: 65px;
 }
 
 /* ── Toolbar button groups ────────────────────────────────── */
@@ -535,12 +554,13 @@ body {
 }
 
 .action-btn.active {
-    background: var(--clr-active-bg);
-    color: var(--clr-accent);
+    background: #0094ca;
+    color: #ffffff;
     border-color: var(--clr-accent);
 }
 
-#rangeButtons .range-btn {
+#rangeButtons .range-btn,
+#liveControls .range-btn {
     background: var(--clr-bg-mid);
     border: 1px solid var(--clr-border);
     border-radius: 3px;
@@ -556,23 +576,20 @@ body {
     flex-shrink: 0;
 }
 
-#rangeButtons .range-btn:hover {
+#rangeButtons .range-btn:hover,
+#liveControls .range-btn:hover {
     background: var(--clr-bg-mid-hover);
     color: var(--clr-text);
     border-color: var(--clr-border-hover);
 }
 
-#rangeButtons .range-btn.active {
-    background: var(--clr-active-bg);
-    color: var(--clr-accent);
+#rangeButtons .range-btn.active,
+#liveControls .range-btn.active {
+    background: #0094ca;
+    color: #ffffff;
     border-color: var(--clr-accent);
 }
 
-#rangeButtons .range-btn.range-btn-live.active {
-    background: var(--clr-live-active-bg);
-    color: var(--clr-live-active-text);
-    border-color: var(--clr-live-active-border);
-}
 
 #rangeButtons .range-btn-select {
     background: var(--clr-bg-mid);
@@ -603,9 +620,12 @@ body {
 
 .action-btn:disabled,
 #rangeButtons .range-btn:disabled,
+#liveControls .range-btn:disabled,
 #rangeButtons .range-btn-select:disabled,
 .date-range-input:disabled,
-.date-range-input:disabled + .date-range-icon {
+.date-range-input:disabled + .date-range-icon,
+#liveControls input:disabled,
+#liveControls select:disabled {
     opacity: 0.35;
     cursor: not-allowed;
 }
