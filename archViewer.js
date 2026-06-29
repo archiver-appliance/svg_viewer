@@ -424,12 +424,6 @@ $(document).ready(function () {
         if (myDiv && myDiv.layout) { Plotly.relayout(myDiv, {dragmode: mode}); }
     }
 
-    function setHoverMode(mode) {
-        document.getElementById('toolHoverClosest').classList.toggle('active', mode === 'closest');
-        document.getElementById('toolHoverCompare').classList.toggle('active', mode === 'x');
-        if (myDiv && myDiv.layout) { Plotly.relayout(myDiv, {hovermode: mode}); }
-    }
-
     document.getElementById('toolZoom').addEventListener('click', function () { setDragMode('zoom'); });
     document.getElementById('toolPan').addEventListener('click', function () { setDragMode('pan'); });
 
@@ -450,16 +444,6 @@ $(document).ready(function () {
     document.getElementById('toolReset').addEventListener('click', function () {
         if (!myDiv || !myDiv.layout) return;
         Plotly.relayout(myDiv, {'xaxis.autorange': true});
-    });
-
-    document.getElementById('toolHoverClosest').addEventListener('click', function () { setHoverMode('closest'); });
-    document.getElementById('toolHoverCompare').addEventListener('click', function () { setHoverMode('x'); });
-
-    document.getElementById('toolSpikeLines').addEventListener('click', function () {
-        if (!myDiv || !myDiv.layout) return;
-        var on = !this.classList.contains('active');
-        this.classList.toggle('active', on);
-        Plotly.relayout(myDiv, {spikedistance: on ? 200 : -1});
     });
 
     document.getElementById('toolSavePng').addEventListener('click', function () {
