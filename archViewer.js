@@ -1673,6 +1673,7 @@ $(document).ready( function() {
 		viewerVars.icons = icons;
 		parseURLParameters();
 		if (viewerVars.pvs.length != 0) {
+			if (viewerVars.renderSelectedList) viewerVars.renderSelectedList();
 			fetchDataFromServerAndPlot("NewPlot");
 		}
 	})
