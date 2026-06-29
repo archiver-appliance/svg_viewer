@@ -135,8 +135,6 @@ function plotAreaHeight() {
         });
 
 		var pvs = viewerVars.pvs;
-
-		//document.getElementById('pvSelectAll').disabled = (pvs.length != 0);
     }
 
     function renderSelectedList() {
@@ -146,7 +144,6 @@ function plotAreaHeight() {
         countEl.textContent = pvs.length ? '(' + pvs.length + ')' : '';
         list.innerHTML = '';
         if (pvs.length === 0) {
-            //list.innerHTML = '<div style="padding:8px 12px;font-size:10px;color:#454d57;">None on plot</div>';
 			document.getElementById('pvSelectAll').disabled = true;
 			document.getElementById('pvUnselectAll').disabled = true;
 			document.getElementById('pvRemove').disabled = true;
@@ -277,7 +274,6 @@ function highlightTrace(pvName) {
         var list = document.getElementById('pvSidebarList');
         list.innerHTML = '';
         if (pvNames.length === 0) {
-            //list.innerHTML = '<div style="padding:10px 12px;font-size:10px;color:#454d57;">No matches</div>';
             return;
         }
         var frag = document.createDocumentFragment();
@@ -470,12 +466,11 @@ function parseRelativeDate(relDate) {
 
 // parse parameters into the viweerVars object
 function parseURLParameters() {
-	queryString = window.location.search;
+	var queryString = window.location.search;
 	if(typeof queryString !== 'undefined' && queryString && queryString.length > 2) {
-		queries = queryString.substring(1).split("&");
-		for ( i = 0, l = queries.length; i < l; i++ ) {
-			var parts = queries[i].split('='), name = parts[0], val =  decodeURIComponent(parts[1]);
-			// console.log("Name="+name+"Val="+val);
+		var queries = queryString.substring(1).split("&");
+		for (var i = 0, l = queries.length; i < l; i++ ) {
+			var parts = queries[i].split('='), name = parts[0], val = decodeURIComponent(parts[1]);
 			switch(name) {
 				case "pv":
 					viewerVars.pvs.push(val);
@@ -483,18 +478,20 @@ function parseURLParameters() {
 					break;
 				case "from":
 					viewerVars.start = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
-					break
+					break;
 				case "to":
 					viewerVars.end = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
-					break
+					break;
 				case "yaxes":
 					viewerVars.egu_yaxis_specs = $.parseJSON(decodeURIComponent(val));
 					break;
 				case "binSize":
 					viewerVars.binSize = parseInt(val);
 					viewerVars.userFixedBinSize = true;
+					break;
 				case "replaceNA":
 					viewerVars.replaceNA = val === 'true' ? true : false;
+					break;
 				default:
 					console.log("Unsupported parameter " + name);
 					break;
@@ -778,7 +775,6 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 				return process3DPlot(pvName, data);
 			}
 
-			// var XAxis_Change_Type = {"NewPlot":1, "ReplaceTraces":2, "LeftPan":3, "RightPan":4};
 			switch(xAxisChangeType) {
 			case "LeftPan": {
 				let previousDataSetFirstSampleMillis = myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].getTime();
@@ -1354,7 +1350,7 @@ function toggleLinearLogScale(egu) {
 function getCurrentDataAsDict() {
 	function naArray(len) {
 		var ret = [];
-		for(var i in len) { ret.push("N/A"); }
+		for(var i = 0; i < len; i++) { ret.push("N/A"); }
 		return ret;
 	}
 
