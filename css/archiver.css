@@ -236,7 +236,8 @@ body {
 #pvSidebar .sidebar-section-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 4px;
     padding: 6px 12px 4px;
     background: #31667D;
     flex-shrink: 0;
@@ -253,7 +254,7 @@ body {
 
 #pvSidebar .sidebar-section-count {
     font-size: 9px;
-    color: #454d57;
+    color: #ffffff;
 }
 
 /* Selected PV list */

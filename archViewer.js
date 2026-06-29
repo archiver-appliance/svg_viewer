@@ -141,7 +141,7 @@ function plotAreaHeight() {
         var list = document.getElementById('pvSelectedList');
         var countEl = document.getElementById('pvSelectedCount');
         var pvs = viewerVars.pvs;
-        countEl.textContent = pvs.length ? '(' + pvs.length + ')' : '';
+        countEl.textContent = '(' + pvs.length + ')';
         list.innerHTML = '';
         if (pvs.length === 0) {
 			document.getElementById('pvSelectAll').disabled = true;
