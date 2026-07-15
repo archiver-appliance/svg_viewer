@@ -638,7 +638,6 @@ function processChangesOnXAxis(eventdata) {
 			layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
 			layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 			layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-			//layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
 			Plotly.relayout(myDiv, layoutChanges);
 			viewerVars.liveModeTimer = setInterval(liveModeTick, 1*1000);
 		} else {
@@ -654,7 +653,6 @@ function processChangesOnXAxis(eventdata) {
 				layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
 				layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 				layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-				//layoutChanges.title = 'EPICS Archiver Appliance Viewer (static mode)';
 				Plotly.relayout(myDiv, layoutChanges);
 			}
 		}
@@ -822,10 +820,8 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 
 		if(viewerVars.pvs.length == 1 || !('layout' in myDiv)) { // This means we are creating the plotly object for the first time...
 			var layout = {
-					//title: 'EPICS Archiver Appliance Viewer (static mode)',
 					title: '',
                     width: window.innerWidth,
-					//height: plotAreaHeight() * 0.95,
 					height: plotAreaHeight(),
 					showlegend: true,
 					legend: {x: 0, y: 1},
@@ -947,7 +943,6 @@ function process3DPlot(pvName, data) {
 	if(viewerVars.currentlyAnimating3DPlot) {
 		viewerVars.currentlyAnimating3DPlot = false;
 		clearInterval(viewerVars.timerIndexFor3DAnimation);
-		// console.log("Stopped existing timer");
 	}
 
 	viewerVars.currentlyAnimating3DPlot = true;
@@ -959,7 +954,6 @@ function process3DPlot(pvName, data) {
 		var frameTime = moment(frameTimeStr).toDate();
 		for(i = 0; i < totalFrames; i++) {
 			if(viewerVars.pvData[pvName].secs[i].getTime() == frameTime.getTime()) {
-				// console.log("Moving to frame " + currentFrame);
 				currentFrame = i;
 				frame();
 				break;
@@ -1007,7 +1001,6 @@ function process3DPlot(pvName, data) {
 		} else { // Plotly object does not exist.
 			viewerVars.plotType = viewerVars.plotTypeEnum.ANIMATE_3D;
 			var layout = {
-				//title: 'EPICS Archiver Appliance Viewer',
 				height: plotAreaHeight() * 0.95,
 				showlegend: true,
 				legend: {x: 0, y: 1},
@@ -1091,7 +1084,6 @@ function liveModeTick() { // Timer function for the live mode tick...
 	layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
 	layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
 	layoutChanges.xaxis.title = getXAxisTitle();
-	//layoutChanges.title = 'EPICS Archiver Appliance Viewer (live mode)';
 	Plotly.relayout(myDiv, layoutChanges);
 
 	fetchDataFromServerAndPlot("ReplaceTraces");
@@ -1214,7 +1206,6 @@ function handleRangeButtonClick(btn, buttonEl) {
         syncDateBar();
         if (myDiv.layout) {
             var lc = { xaxis: { autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()], domain: myDiv.layout.xaxis.domain } };
-            //lc.title = 'EPICS Archiver Appliance Viewer (live mode)';
             Plotly.relayout(myDiv, lc);
         }
         fetchDataFromServerAndPlot("ReplaceTraces");
@@ -1427,7 +1418,6 @@ function exportToCSV() {
 
 	let csvContent = "Timestamp," + names.join(",") + "\n";
 	Object.keys(tbl).forEach(function(key) { csvContent +=  moment(key).format("YYYY/MM/DD HH:mm:ss.SSS,") + tbl[key].join(",") + "\n"; });
-	//myWindow = window.open("data:text/csv;charset=utf-8," + encodeURIComponent(csvContent));
 	viewFile("data:text/csv;charset=utf-8," + encodeURIComponent(csvContent));
 }
 
