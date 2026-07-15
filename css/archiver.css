@@ -31,14 +31,13 @@ body {
 
 /* ── PV Sidebar ──────────────────────────────────────────── */
 #pvSidebar {
-    width: 240px;
-    min-width: 240px;
+    width: 250px;
+    min-width: 250px;
     align-self: stretch;
     background: #f5f6f8;
     border-right: 1px solid #e1e4ea;
     display: flex;
     flex-direction: column;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     isolation: isolate;
     z-index: 100;
     transition: width 0.25s ease, min-width 0.25s ease;
@@ -308,7 +307,6 @@ body {
     border: 1px solid #e1e4ea;
     border-radius: 3px;
     color: #293035;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     font-size: 8px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -365,7 +363,6 @@ body {
     background: #31667D;
     border-bottom: 1px solid #e1e4ea;
     flex-shrink: 0;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     overflow-x: auto;
     overflow-y: visible;
     white-space: nowrap;
@@ -442,7 +439,6 @@ body {
     border: 1px solid #017daa;
     border-radius: 3px;
     color: #ffffff;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     font-size: 11px;
     padding: 4px 8px;
     outline: none;
@@ -472,7 +468,6 @@ body {
     border: 1px solid #017daa;
     border-radius: 3px;
     color: #ffffff;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -541,7 +536,6 @@ body {
     border: 1px solid #017daa;
     border-radius: 3px;
     color: #ffffff;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -572,7 +566,6 @@ body {
     border: 1px solid #017daa;
     border-radius: 3px;
     color: #ffffff;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.04em;
