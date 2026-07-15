@@ -296,7 +296,7 @@ function highlightTrace(pvName) {
             return;
         }
         setStatus('Searching…');
-        $.getJSON(viewerVars.serverURL + '/../bpl/getMatchingPVs?limit=500&pv=' + encodeURIComponent(pattern))
+        $.getJSON(viewerVars.serverURL + '/../bpl/getMatchingPVs?pv=' + encodeURIComponent(pattern))
             .done(function (pvNames) {
                 setStatus(pvNames.length + ' result' + (pvNames.length === 1 ? '' : 's'));
                 renderList(pvNames);
