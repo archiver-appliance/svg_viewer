@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY node_modules/ ./node_modules/
 
+COPY css/ ./css/
+
 COPY archViewer.html .
 
 COPY archViewer.js .
