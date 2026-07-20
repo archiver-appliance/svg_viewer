@@ -17,5 +17,10 @@ COPY fapaths.json .
 COPY viewerProxy.py .
 
 
-CMD ["python3", "viewerProxy.py", "8080", "http://skybreweru.cslab.esss.lu.se:17668/retrieval"]
+ENV LISTEN_PORT=8080
+
+ENV HOST_NAME=http://remote-archiver-appliance.ess.eu:17668/retrieval/
+
+
+CMD ["python3", "viewerProxy.py", "$LISTEN_PORT", "$HOST_NAME"]
 
