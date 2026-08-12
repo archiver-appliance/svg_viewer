@@ -58,10 +58,12 @@ viewerVars.postToElogURL = "../../../postToElog";
 
 viewerVars.siteSupportsPostToElog = false;
 
-$.get("../../../site_params.json")
-	.done(function (site_params) {
+fetch("../../../site_params.json")
+	.then(function(r) { return r.json(); })
+	.then(function(site_params) {
 		viewerVars.siteSupportsPostToElog = _.get(site_params, "siteSupportsPostToElog", false);
 	})
+	.catch(function() {});
 
 // Google finance like list of time windows..
 viewerVars.selectorOptions = {
@@ -296,12 +298,13 @@ function highlightTrace(pvName) {
             return;
         }
         setStatus('Searching…');
-        $.getJSON(viewerVars.serverURL + '/../bpl/getMatchingPVs?pv=' + encodeURIComponent(pattern))
-            .done(function (pvNames) {
+        fetch(viewerVars.serverURL + '/../bpl/getMatchingPVs?pv=' + encodeURIComponent(pattern))
+            .then(function(r) { return r.json(); })
+            .then(function(pvNames) {
                 setStatus(pvNames.length + ' result' + (pvNames.length === 1 ? '' : 's'));
                 renderList(pvNames);
             })
-            .fail(function () {
+            .catch(function() {
                 setStatus('Search failed');
                 renderList([]);
             });
@@ -332,16 +335,16 @@ function highlightTrace(pvName) {
 
 
 // implement side bar pin/unpin logic
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     var SIDEBAR_WIDTH = 240;
     var COLLAPSED_WIDTH = 32;
     var TRANSITION_MS = 260;
 
-    var $sidebar = $('#pvSidebar');
-    var $toggle  = $('#pvSidebarToggle');
+    var sidebar = document.getElementById('pvSidebar');
+    var toggle  = document.getElementById('pvSidebarToggle');
 
     function resizePlot() {
-        var isExpanded = !$sidebar.hasClass('unpinned') || $sidebar.hasClass('hovered');
+        var isExpanded = !sidebar.classList.contains('unpinned') || sidebar.classList.contains('hovered');
         var sidebarW = isExpanded ? SIDEBAR_WIDTH : COLLAPSED_WIDTH;
         var newWidth = window.innerWidth - sidebarW;
         if (myDiv && myDiv.layout) {
@@ -349,37 +352,37 @@ $(document).ready(function () {
         }
     }
 
-    $toggle.on('click', function () {
-        $sidebar.toggleClass('unpinned');
-        var unpinned = $sidebar.hasClass('unpinned');
-        if (!unpinned) { $sidebar.removeClass('hovered'); }
-        $toggle.attr('title', unpinned ? 'Pin sidebar' : 'Unpin sidebar');
+    toggle.addEventListener('click', function () {
+        sidebar.classList.toggle('unpinned');
+        var unpinned = sidebar.classList.contains('unpinned');
+        if (!unpinned) { sidebar.classList.remove('hovered'); }
+        toggle.title = unpinned ? 'Pin sidebar' : 'Unpin sidebar';
         setTimeout(resizePlot, TRANSITION_MS);
     });
 
-    $sidebar.on('mouseenter', function () {
-        if ($sidebar.hasClass('unpinned')) {
-            $sidebar.addClass('hovered');
+    sidebar.addEventListener('mouseenter', function () {
+        if (sidebar.classList.contains('unpinned')) {
+            sidebar.classList.add('hovered');
             setTimeout(resizePlot, TRANSITION_MS);
         }
     });
 
-    $sidebar.on('mouseleave', function () {
-        if ($sidebar.hasClass('unpinned')) {
-            $sidebar.removeClass('hovered');
+    sidebar.addEventListener('mouseleave', function () {
+        if (sidebar.classList.contains('unpinned')) {
+            sidebar.classList.remove('hovered');
             setTimeout(resizePlot, TRANSITION_MS);
         }
     });
 
-    $(window).on('resize', resizePlot);
+    window.addEventListener('resize', resizePlot);
 });
 
 
 // implement top bar pin/unpin logic
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     var TRANSITION_MS = 260;
-    var $bar    = $('#dateRangeBar');
-    var $toggle = $('#dateRangeBarToggle');
+    var bar    = document.getElementById('dateRangeBar');
+    var toggle = document.getElementById('dateRangeBarToggle');
 
     function resizePlotHeight() {
         if (myDiv && myDiv.layout) {
@@ -387,25 +390,25 @@ $(document).ready(function () {
         }
     }
 
-    $toggle.on('click', function (e) {
+    toggle.addEventListener('click', function (e) {
         e.stopPropagation();
-        $bar.toggleClass('unpinned');
-        var unpinned = $bar.hasClass('unpinned');
-        if (!unpinned) { $bar.removeClass('hovered'); }
-        $toggle.attr('title', unpinned ? 'Pin top bar' : 'Unpin top bar');
+        bar.classList.toggle('unpinned');
+        var unpinned = bar.classList.contains('unpinned');
+        if (!unpinned) { bar.classList.remove('hovered'); }
+        toggle.title = unpinned ? 'Pin top bar' : 'Unpin top bar';
         setTimeout(resizePlotHeight, TRANSITION_MS);
     });
 
-    $bar.on('mouseenter', function () {
-        if ($bar.hasClass('unpinned')) {
-            $bar.addClass('hovered');
+    bar.addEventListener('mouseenter', function () {
+        if (bar.classList.contains('unpinned')) {
+            bar.classList.add('hovered');
             setTimeout(resizePlotHeight, TRANSITION_MS);
         }
     });
 
-    $bar.on('mouseleave', function () {
-        if ($bar.hasClass('unpinned')) {
-            $bar.removeClass('hovered');
+    bar.addEventListener('mouseleave', function () {
+        if (bar.classList.contains('unpinned')) {
+            bar.classList.remove('hovered');
             setTimeout(resizePlotHeight, TRANSITION_MS);
         }
     });
@@ -413,7 +416,7 @@ $(document).ready(function () {
 
 
 // implement chart tool buttons logic
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     function setDragMode(mode) {
         document.getElementById('toolZoom').classList.toggle('active', mode === 'zoom');
         document.getElementById('toolPan').classList.toggle('active', mode === 'pan');
@@ -483,7 +486,7 @@ function parseURLParameters() {
 					viewerVars.end = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
 					break;
 				case "yaxes":
-					viewerVars.egu_yaxis_specs = $.parseJSON(decodeURIComponent(val));
+					viewerVars.egu_yaxis_specs = JSON.parse(decodeURIComponent(val));
 					break;
 				case "binSize":
 					viewerVars.binSize = parseInt(val);
@@ -673,8 +676,8 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 	}
 
 	let pvsToFetchData = (xAxisChangeType == "AddNewTrace") ? newTracePVNames : viewerVars.pvs;
-	let pvDataPromises = _.times(pvsToFetchData.length, function() { return new $.Deferred()}), datas = new Array(pvsToFetchData.length);
-	_.each(pvsToFetchData, function(unsafePVName, i) {
+	var datas = new Array(pvsToFetchData.length);
+	var fetchPromises = pvsToFetchData.map(function(unsafePVName, i) {
 		let pvName = encodeURIComponent(unsafePVName);
 		let queryString = "";
 		if(viewerVars.binSize > 0) {
@@ -699,20 +702,22 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 
 		let pvDataUrl = viewerVars.serverURL + "/getData.qw?" + queryString + startEndQs;
 		console.log(pvDataUrl);
-		$.getJSON(pvDataUrl).done(function (d0) {
-			datas[i] = d0;
-			pvDataPromises[i].resolve(true)
-		}).fail(function (jqXHR, textStatus, errorThrown) {
-			console.log("Server side failure getting data for " + unsafePVName + "\n" + jqXHR.responseText);
-			datas[i] = {};
-			pvDataPromises[i].resolve(false)
-		});
-	})
+		return fetch(pvDataUrl)
+			.then(function(r) { return r.json(); })
+			.then(function(d0) {
+				datas[i] = d0;
+				return true;
+			})
+			.catch(function(err) {
+				console.log("Server side failure getting data for " + unsafePVName + "\n" + err);
+				datas[i] = {};
+				return false;
+			});
+	});
 
-	$.when.apply($, pvDataPromises).done(function () {
-		// The done is called with the results of the .getJSON's for all the submitted URLs. Use the Javascript arguments object to unpack the data.
-		for(let i = 0, l = arguments.length; i < l; i++) {
-			if (!arguments[i]) {
+	Promise.all(fetchPromises).then(function(results) {
+		for(let i = 0, l = results.length; i < l; i++) {
+			if (!results[i]) {
 				new Noty({
 					type: "error",
 					timeout: 5000,
@@ -833,7 +838,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0]))
 			};
 			var layoutChanges = getLayoutChangesForMultipleYAxes(layout);
-			$.extend(true, layout, layoutChanges);
+			_.merge(layout, layoutChanges);
 
 			var traces = computeTraceIndices();
 			viewerVars.plotType = viewerVars.plotTypeEnum.SCATTER_2D;
@@ -909,7 +914,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
 					break;
 			}
 		}
-	}).fail(function() { console.log("Failed to get data from the server"); });;
+	}).catch(function() { console.log("Failed to get data from the server"); });
 }
 
 function generatePlotConfig() {
@@ -1049,22 +1054,19 @@ function updateXAxisTitle() {
 
 // If the PV has a .DESC, we add that as a tooltip to the PV's legend.
 function addToolTipsToTraceLegends() {
-	$("g.legend g.traces").each(function() {
-		var pvName = $( this ).children('.legendtext').attr('data-unformatted');
+	document.querySelectorAll("g.legend g.traces").forEach(function(el) {
+		var pvName = el.querySelector('.legendtext').getAttribute('data-unformatted');
 		var ttipText = _.get(viewerVars.pvData[pvName], 'DESC', '') + "  -  (" + _.get(viewerVars.pvData[pvName], 'egu', 'N/A') + ")";
 		var ttip = document.createElementNS("http://www.w3.org/2000/svg", 'title');
 		ttip.appendChild(document.createTextNode(ttipText));
-		$( this )[0].appendChild(ttip);
+		el.appendChild(ttip);
 	});
 }
 
 // We show fixed bin sizes in a different color; dynamic bin sizes are neutral.
 function reflectBinSizeColorOnLegend() {
-	if(viewerVars.userFixedBinSize) {
-		$(".xtitle").addClass("fixedBinSize");
-	} else {
-		$(".xtitle").removeClass("fixedBinSize");
-	}
+	var xtitle = document.querySelector(".xtitle");
+	if (xtitle) { xtitle.classList.toggle("fixedBinSize", viewerVars.userFixedBinSize); }
 }
 
 
@@ -1239,10 +1241,10 @@ function handleRangeButtonClick(btn, buttonEl) {
 
 function syncDateBar() {
     if (viewerVars.start) {
-        $("#dialog_startTime").val(moment(viewerVars.start).format("YYYY/MM/DD HH:mm:ss"));
+        document.getElementById('dialog_startTime').value = moment(viewerVars.start).format("YYYY/MM/DD HH:mm:ss");
     }
     if (viewerVars.end) {
-        $("#dialog_endTime").val(moment(viewerVars.end).format("YYYY/MM/DD HH:mm:ss"));
+        document.getElementById('dialog_endTime').value = moment(viewerVars.end).format("YYYY/MM/DD HH:mm:ss");
     }
 }
 
@@ -1255,8 +1257,8 @@ function startAndEndTimeSelected() {
 	hideLiveControls();
 	viewerVars.currentButton = '';
 
-	viewerVars.start = moment($("#dialog_startTime").val(), "YYYY/MM/DD HH:mm:ss").toDate();
-	viewerVars.end   = moment($("#dialog_endTime").val(), "YYYY/MM/DD HH:mm:ss").toDate();
+	viewerVars.start = moment(document.getElementById('dialog_startTime').value, "YYYY/MM/DD HH:mm:ss").toDate();
+	viewerVars.end   = moment(document.getElementById('dialog_endTime').value, "YYYY/MM/DD HH:mm:ss").toDate();
 	viewerVars.queryStart = viewerVars.start;
 	viewerVars.queryEnd = viewerVars.end;
 
@@ -1288,8 +1290,10 @@ function toggleFullscreen() {
 
     if (!document.fullscreenElement) {
         // save current sidebar state before collapsing it
-        viewerVars.sidebarWasUnpinned = $('#pvSidebar').hasClass('unpinned');
-        $('#pvSidebar').addClass('unpinned').removeClass('hovered');
+        var _sidebar = document.getElementById('pvSidebar');
+        viewerVars.sidebarWasUnpinned = _sidebar.classList.contains('unpinned');
+        _sidebar.classList.add('unpinned');
+        _sidebar.classList.remove('hovered');
         el.requestFullscreen()
             .then(function () {
                 Plotly.relayout(myDiv, {
@@ -1311,7 +1315,7 @@ function toggleFullscreen() {
 
 
 function fixBinSize() {
-	let binSize = parseInt($("#binSizeInput").val());
+	let binSize = parseInt(document.getElementById('binSizeInput').value);
 	if(binSize > 0) {
 		viewerVars.userFixedBinSize = true;
 		viewerVars.binSize = binSize;
@@ -1525,8 +1529,8 @@ function showElogModal(gd) {
           gd._snapshotInProgress = false;
           viewerVars.currentSnapshot = makeblob(result);
           console.log("Done generating snapshot and storing in viewervars");
-          $("#elogComment").val("");
-          $('#elogModal').modal('show');
+          document.getElementById('elogComment').value = "";
+          document.getElementById('elogModal').showModal();
       })
       .catch(function() {
           gd._snapshotInProgress = false;
@@ -1538,17 +1542,12 @@ function postToELog() {
     if(viewerVars.currentSnapshot == null) { return; }
     let data = new FormData();
     data.append("snapshot", viewerVars.currentSnapshot);
-    data.append("comment", $("#elogComment").val());
+    data.append("comment", document.getElementById('elogComment').value);
     data.append("link", getLinkToCurrentView());
-    $.ajax({
-        url: viewerVars.postToElogURL,
-        cache: false, contentType: false, processData: false,
-        method: 'POST',
-        data: data
-       })
-   .done(function(data) { console.log("Successfully posted to the elog"); })
-   .fail(function(jqXHR, textStatus, errorThrown) { alert("Error posting to the elog " + jqXHR.statusText); console.log(jqXHR);})
-   .always(function(){ viewerVars.currentSnapshot = null; })
+    fetch(viewerVars.postToElogURL, { method: 'POST', body: data })
+        .then(function() { console.log("Successfully posted to the elog"); })
+        .catch(function(err) { alert("Error posting to the elog: " + err); })
+        .finally(function() { viewerVars.currentSnapshot = null; });
 }
 
 function showYAxesRangeModal() {
@@ -1559,14 +1558,14 @@ function showYAxesRangeModal() {
         "min": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[0]', -10)),
         "max": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[1]',  10))
     }})
-    $("#yAxesModal").find("table tbody").empty().append(Mustache.render(axtmpl, yranges));
-    $('#yAxesModal').modal('show');
+    document.querySelector("#yAxesModal table tbody").innerHTML = Mustache.render(axtmpl, yranges);
+    document.getElementById('yAxesModal').showModal();
 }
 
 function applyYAxesRanges() {
     let newlayout = myDiv.layout;
     _.each(viewerVars.egu2axis, function(v, k) {
-        let range = [parseFloat($("#yAxesModal").find("table tbody").find("input[name="+k+"_min]").val()), parseFloat($("#yAxesModal").find("table tbody").find("input[name="+k+"_max]").val())];
+        let range = [parseFloat(document.querySelector('#yAxesModal table tbody input[name="' + k + '_min"]').value), parseFloat(document.querySelector('#yAxesModal table tbody input[name="' + k + '_max"]').value)];
         _.set(viewerVars.egu_yaxis_specs, k + '.range', range);
         _.set(newlayout, viewerVars.y_short_2_long[v] + ".autorange", false);
         _.set(newlayout, viewerVars.y_short_2_long[v] + ".range", range);
@@ -1578,8 +1577,8 @@ function showRemovePVsModal() {
     if(viewerVars.pvs.length <= 0) { return; }
     let rmtmpl = `{{#pvNames}}<div class="checkbox"><label><input type="checkbox" value="{{.}}">{{.}}</label></div>{{/pvNames}}`;
     Mustache.parse(rmtmpl);
-    $("#removePVsModal").find(".checkboxlist").empty().append(Mustache.render(rmtmpl, { pvNames: viewerVars.pvs }));
-    $('#removePVsModal').modal('show');
+    document.querySelector("#removePVsModal .checkboxlist").innerHTML = Mustache.render(rmtmpl, { pvNames: viewerVars.pvs });
+    document.getElementById('removePVsModal').showModal();
 }
 
 function removePVFromPlot(pvName) {
@@ -1593,8 +1592,8 @@ function removePVFromPlot(pvName) {
 }
 
 function removeSelectedPVs() {
-	$("#removePVsModal").find(".checkboxlist").find("input:checked").each(function () {
-		removePVFromPlot($(this).val());
+	document.querySelectorAll("#removePVsModal .checkboxlist input:checked").forEach(function(el) {
+		removePVFromPlot(el.value);
 	});
 }
 
@@ -1654,52 +1653,54 @@ function calculateLiveCount() {
 	return liveButtonCount;
 }
 
-$(document).ready( function() {
-	$.getJSON("fapaths.json").done(function (icons) {
-		viewerVars.icons = icons;
-		parseURLParameters();
-		if (viewerVars.pvs.length != 0) {
-			if (viewerVars.renderSelectedList) viewerVars.renderSelectedList();
-			fetchDataFromServerAndPlot("NewPlot");
-		}
-	})
+document.addEventListener('DOMContentLoaded', function() {
+	fetch("fapaths.json")
+		.then(function(r) { return r.json(); })
+		.then(function(icons) { viewerVars.icons = icons; })
+		.catch(function() {})
+		.then(function() {
+			parseURLParameters();
+			if (viewerVars.pvs.length != 0) {
+				if (viewerVars.renderSelectedList) viewerVars.renderSelectedList();
+				fetchDataFromServerAndPlot("NewPlot");
+			}
+		});
 
-	$(document).on("paste", function (ev) {
-		var pvName = ev.originalEvent.clipboardData.getData('text/plain').trim();
+	document.addEventListener("paste", function(ev) {
+		var pvName = ev.clipboardData.getData('text/plain').trim();
 		if (typeof pvName !== 'undefined' && pvName && pvName.length > 2) {
 			console.log("Pasting PV from clipboard event " + pvName);
-			addTraceForNewPVs([ev.originalEvent.clipboardData.getData('text/plain').trim()]);
+			addTraceForNewPVs([pvName]);
 		}
 	});
 
+	// implement fullscreen logic
+	document.addEventListener('fullscreenchange', function () {
+		var isFullscreen = !!document.fullscreenElement;
+		var _sidebar = document.getElementById('pvSidebar');
 
-// implement fullscreen logic
-document.addEventListener('fullscreenchange', function () {
-    var isFullscreen = !!document.fullscreenElement;
+		if (isFullscreen) {
+			_sidebar.classList.add('unpinned');
+			_sidebar.classList.remove('hovered');
+		} else {
+			if (viewerVars.sidebarWasUnpinned) {
+				_sidebar.classList.add('unpinned');
+			} else {
+				_sidebar.classList.remove('unpinned', 'hovered');
+			}
+		}
 
-    if (isFullscreen) {
-        $('#pvSidebar').addClass('unpinned').removeClass('hovered');
-    } else {
-        // restore to whatever state it was in before fullscreen
-        if (viewerVars.sidebarWasUnpinned) {
-            $('#pvSidebar').addClass('unpinned');
-        } else {
-            $('#pvSidebar').removeClass('unpinned hovered');
-        }
-    }
-
-    Plotly.relayout(myDiv, {
-        autosize: true,
-        height: (isFullscreen ? window.screen.height : plotAreaHeight()) * 0.95
-    });
-});
-
+		Plotly.relayout(myDiv, {
+			autosize: true,
+			height: (isFullscreen ? window.screen.height : plotAreaHeight()) * 0.95
+		});
+	});
 
 	// There is a big SVG drag area over much of the plot; so we do this to determine if the user has clicked on some plot element.
-	$(document).click(function(e) {
+	document.addEventListener('click', function(e) {
 		for(var shortName in viewerVars.axis2egu) { // Check to see if the user clicked on one of the y-axes
-			var axisObj = $("." + viewerVars.y_short_2_axisclass[shortName])[0];
-			if (typeof axisObj == 'undefined') continue;
+			var axisObj = document.querySelector("." + viewerVars.y_short_2_axisclass[shortName]);
+			if (!axisObj) continue;
 			var bRect = axisObj.getBoundingClientRect();
 			if(e.pageX >= bRect.left && e.pageX <= bRect.right && e.pageY >= bRect.top && e.pageY <= bRect.bottom) {
 				console.log("Axis " + viewerVars.axis2egu[shortName] + " clicked");
@@ -1708,18 +1709,17 @@ document.addEventListener('fullscreenchange', function () {
 			}
 		}
 
-		var xaxisDom = $(".xtitle")[0];
-		if(typeof xaxisDom !== 'undefined') { // Check to see if the user clicked on one of the x-axis components
+		var xaxisDom = document.querySelector(".xtitle");
+		if(xaxisDom) { // Check to see if the user clicked on one of the x-axis components
 			var bRect = xaxisDom.getBoundingClientRect();
 			var leftOffset = bRect.left + window.scrollX, topOffset = bRect.top + window.scrollY;
-			if(e.pageX >= leftOffset && e.pageX <= (leftOffset + bRect.width) && e.pageY >= topOffset && e.pageY <= (topOffset + bRect.height)) { // console.log("We are within the X-Axis label now");
+			if(e.pageX >= leftOffset && e.pageX <= (leftOffset + bRect.width) && e.pageY >= topOffset && e.pageY <= (topOffset + bRect.height)) {
 				try {
 					var ppl = xaxisDom.children[0].getBBox().x; var bnl = ppl + xaxisDom.children[0].getComputedTextLength();
 				} finally {
 					var ppl = xaxisDom.children[0].getBoundingClientRect().left + window.scrollX; var bnl = ppl + xaxisDom.children[0].getComputedTextLength();
 				}
-				if(e.pageX >= ppl && e.pageX <= bnl ) {
-					// Toggle between the various operators; note that this is a global operation for now and applies to all PV's
+				if(e.pageX >= ppl && e.pageX <= bnl) {
 					var nextBinningOperator = viewerVars.binningOperatorsList[((viewerVars.binningOperatorsList.indexOf(viewerVars.currentBinningOperator)+1)%viewerVars.binningOperatorsList.length)];
 					if(nextBinningOperator == "raw" && getEstimatedRawSamples() > 1000000) {
 						console.log("Skip switching into the raw operator as we estimate to have more than 1000000 samples for one of the PV's");
@@ -1728,13 +1728,12 @@ document.addEventListener('fullscreenchange', function () {
 					viewerVars.currentBinningOperator = nextBinningOperator;
 					fetchDataFromServerAndPlot("ReplaceTraces");
 				} else {
-					// We assume that the viewer will always prefer raw mode; so turn off the operator selection is bin size is 0.
 					if(viewerVars.binSize > 0) {
 						if(viewerVars.userFixedBinSize) {
 							viewerVars.userFixedBinSize = false;
 							reflectBinSizeColorOnLegend();
 						} else {
-							$('#binSizeModal').modal('show');
+							document.getElementById('binSizeModal').showModal();
 						}
 					}
 				}

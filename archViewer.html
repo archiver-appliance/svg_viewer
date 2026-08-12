@@ -8,18 +8,13 @@
 
 
 <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css" rel="stylesheet">
-
 <link href="css/noty_3.1.4.css" rel="stylesheet">
 <link href="css/archiver.css" rel="stylesheet">
 
 
 <script src="node_modules/lodash/lodash.min.js"></script>
 <script src="node_modules/plotly.js-dist-min/plotly.min.js"></script>
-<script src="node_modules/jquery/dist/jquery.min.js"></script>
-<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="node_modules/moment/moment.js"></script>
-<script src="node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
 <script src="node_modules/mustache/mustache.min.js"></script>
 <script src="node_modules/noty/lib/noty.min.js"></script>
 
@@ -66,18 +61,16 @@
 <div id="mainPanel">
 <div id="dateRangeBar">
         <span class="date-range-label">Start</span>
-        <div class="input-group date" id="startTime">
-            <input id="dialog_startTime" type="text" class="date-range-input" autocomplete="off" spellcheck="false"/>
-            <span class="input-group-addon date-range-icon">
-                <span class="glyphicon glyphicon-calendar"></span>
-            </span>
+        <div class="date-range-picker-wrap">
+            <input type="text" id="dialog_startTime" class="date-range-input" autocomplete="off" spellcheck="false" placeholder="YYYY/MM/DD HH:mm:ss"/>
+            <button class="date-range-icon" id="startTimeTrigger" title="Pick date" data-icon="calendar"></button>
+            <input type="datetime-local" id="startTimePicker" class="date-picker-hidden" step="1" tabindex="-1"/>
         </div>
         <span class="date-range-label">End</span>
-        <div class="input-group date" id="endTime">
-            <input id="dialog_endTime" type="text" class="date-range-input" autocomplete="off" spellcheck="false"/>
-            <span class="input-group-addon date-range-icon">
-                <span class="glyphicon glyphicon-calendar"></span>
-            </span>
+        <div class="date-range-picker-wrap">
+            <input type="text" id="dialog_endTime" class="date-range-input" autocomplete="off" spellcheck="false" placeholder="YYYY/MM/DD HH:mm:ss"/>
+            <button class="date-range-icon" id="endTimeTrigger" title="Pick date" data-icon="calendar"></button>
+            <input type="datetime-local" id="endTimePicker" class="date-picker-hidden" step="1" tabindex="-1"/>
         </div>
         <div id="rangeButtons"></div>
         <div id="liveControls">
@@ -106,47 +99,40 @@
         </div>
         <button id="dateRangeBarToggle" title="Unpin top bar" data-icon="pin"></button>
         <script type="text/javascript">
-            $(function () {
-                function fixDatepickerPosition($component) {
-                    // The library positions using .position() (relative to offset parent),
-                    // but the widget lives in body and needs .offset() (document-absolute).
-                    // Use setTimeout to run after the library's own I() call finishes.
-                    setTimeout(function () {
-                        var $widget = $('.bootstrap-datetimepicker-widget:visible');
-                        if (!$widget.length) return;
-                        var off = $component.offset();
-                        $widget.css({
-                            top:  off.top + $component.outerHeight(),
-                            left: off.left
-                        });
-                    }, 0);
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('dialog_startTime').addEventListener('change', startAndEndTimeSelected);
+                document.getElementById('dialog_endTime').addEventListener('change', startAndEndTimeSelected);
+                document.getElementById('dialog_startTime').addEventListener('keydown', function(e) {
+                    if (e.keyCode == 13) { e.preventDefault(); startAndEndTimeSelected(); }
+                });
+                document.getElementById('dialog_endTime').addEventListener('keydown', function(e) {
+                    if (e.keyCode == 13) { e.preventDefault(); startAndEndTimeSelected(); }
+                });
+                function wireDatePicker(textId, pickerId, triggerId) {
+                    var picker  = document.getElementById(pickerId);
+                    var trigger = document.getElementById(triggerId);
+                    trigger.addEventListener('click', function() {
+                        var current = moment(document.getElementById(textId).value, "YYYY/MM/DD HH:mm:ss");
+                        if (current.isValid()) { picker.value = current.format("YYYY-MM-DDTHH:mm:ss"); }
+                        picker.showPicker();
+                    });
+                    picker.addEventListener('change', function() {
+                        if (this.value) {
+                            document.getElementById(textId).value = moment(this.value).format("YYYY/MM/DD HH:mm:ss");
+                            startAndEndTimeSelected();
+                        }
+                    });
                 }
-                $('#startTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss", widgetParent: 'body'});
-                $('#endTime').datetimepicker({format: "YYYY/MM/DD HH:mm:ss", widgetParent: 'body'});
-                $('#startTime').on('dp.show', function () { fixDatepickerPosition($(this)); });
-                $('#endTime').on('dp.show', function () { fixDatepickerPosition($(this)); });
-                $('#startTime').on('dp.change', startAndEndTimeSelected);
-                $('#endTime').on('dp.change', startAndEndTimeSelected);
-                $('#dialog_startTime').keydown(function(e) {
-                    if (e.keyCode == 13) {
-                        e.preventDefault();
-                        startAndEndTimeSelected();
-                    }
-                });
-                $('#dialog_endTime').keydown(function(e) {
-                    if (e.keyCode == 13) {
-                        e.preventDefault();
-                        startAndEndTimeSelected();
-                    }
-                });
+                wireDatePicker('dialog_startTime', 'startTimePicker', 'startTimeTrigger');
+                wireDatePicker('dialog_endTime',   'endTimePicker',   'endTimeTrigger');
                 renderRangeButtons();
-                $('#unitInput').on('change', showAdvancedView);
-                $('#timeInput').on('change', showAdvancedView);
-                $('#timeInput').on('blur', function() {
+                document.getElementById('unitInput').addEventListener('change', showAdvancedView);
+                document.getElementById('timeInput').addEventListener('change', showAdvancedView);
+                document.getElementById('timeInput').addEventListener('blur', function() {
                     if (!this.value || parseInt(this.value) < 1) this.value = 1;
                     showAdvancedView();
                 });
-                $('#timeInput').keydown(function(e) {
+                document.getElementById('timeInput').addEventListener('keydown', function(e) {
                     if (e.keyCode == 13) {
                         e.preventDefault();
                         if (!this.value || parseInt(this.value) < 1) this.value = 1;
@@ -175,15 +161,15 @@
 </div>
 
 <!--  Choose bin size  -->
-<div id="binSizeModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<dialog id="binSizeModal" aria-labelledby="binSizeModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" id="binSizeModalClose">
                        <span aria-hidden="true">&times;</span>
                        <span class="sr-only">Close</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">
+                <h4 class="modal-title" id="binSizeModalTitle">
                     Choose a bin size (in seconds):
                 </h4>
             </div>
@@ -199,39 +185,38 @@
                   </div>
                 </form>
                 <div class="modal-footer">
-        			<button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+        			<button type="button" class="btn btn-default" id="binSizeDone">Done</button>
       			</div>
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        $(function () {
-            $('#binSizeModal').on('hidden.bs.modal', fixBinSize);
-            $("#binSizeInput").keydown(function(e) {
-                if (e.keyCode == 13) {
-                    e.preventDefault();
-                    $("#binSizeModal").modal("hide");
-                    fixBinSize();
-                }
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = document.getElementById('binSizeModal');
+            modal.addEventListener('close', fixBinSize);
+            document.getElementById('binSizeModalClose').addEventListener('click', function() { modal.close(); });
+            document.getElementById('binSizeDone').addEventListener('click', function() { modal.close(); });
+            document.getElementById('binSizeInput').addEventListener('keydown', function(e) {
+                if (e.keyCode == 13) { e.preventDefault(); modal.close(); }
             });
         });
     </script>
-</div>
+</dialog>
 
 
 
 
 
 <!--  Comment for elog  -->
-<div id="elogModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<dialog id="elogModal" aria-labelledby="elogModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" id="elogModalClose">
                        <span aria-hidden="true">&times;</span>
                        <span class="sr-only">Close</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">
+                <h4 class="modal-title" id="elogModalTitle">
                     Post to the elog:
                 </h4>
             </div>
@@ -242,28 +227,30 @@
                   <div class="form-group"><textarea rows="5" class="form-control" id="elogComment" placeholder="Please add a comment for the eLog" ></textarea></div>
                 </form>
                 <div class="modal-footer">
-        			<button type="button" class="btn btn-default" data-dismiss="modal" id="elogPost">Post</button>
+        			<button type="button" class="btn btn-default" id="elogPost">Post</button>
       			</div>
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        $(function () {
-            $('#elogPost').on('click', postToELog);
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = document.getElementById('elogModal');
+            document.getElementById('elogModalClose').addEventListener('click', function() { modal.close(); });
+            document.getElementById('elogPost').addEventListener('click', function() { postToELog(); modal.close(); });
         });
     </script>
-</div>
+</dialog>
 
 <!--  Ranges for the Y-Axes  -->
-<div id="yAxesModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<dialog id="yAxesModal" aria-labelledby="yAxesModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" id="yAxesModalClose">
                        <span aria-hidden="true">&times;</span>
                        <span class="sr-only">Close</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">
+                <h4 class="modal-title" id="yAxesModalTitle">
                     Specify ranges for the Y Axes based on EGU's:
                 </h4>
             </div>
@@ -279,28 +266,30 @@
                     </table>
                 </form>
                 <div class="modal-footer">
-        			<button type="button" class="btn btn-default" data-dismiss="modal" id="yAxesPost">Set Ranges</button>
+        			<button type="button" class="btn btn-default" id="yAxesPost">Set Ranges</button>
       			</div>
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        $(function () {
-            $('#yAxesPost').on('click', applyYAxesRanges);
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = document.getElementById('yAxesModal');
+            document.getElementById('yAxesModalClose').addEventListener('click', function() { modal.close(); });
+            document.getElementById('yAxesPost').addEventListener('click', function() { applyYAxesRanges(); modal.close(); });
         });
     </script>
-</div>
+</dialog>
 
 <!--  remove PVs  -->
-<div id="removePVsModal" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<dialog id="removePVsModal" aria-labelledby="removePVsModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" id="removePVsModalClose">
                        <span aria-hidden="true">&times;</span>
                        <span class="sr-only">Close</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">
+                <h4 class="modal-title" id="removePVsModalTitle">
                     Remove selected PVs
                 </h4>
             </div>
@@ -313,16 +302,18 @@
                 </form>
             </div>
              <div class="modal-footer">
-     			<button type="button" class="btn btn-default" data-dismiss="modal" id="removePVsBtn">Remove</button>
+     			<button type="button" class="btn btn-default" id="removePVsBtn">Remove</button>
    			</div>
         </div>
     </div>
     <script type="text/javascript">
-        $(function () {
-            $('#removePVsBtn').on('click', removeSelectedPVs);
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = document.getElementById('removePVsModal');
+            document.getElementById('removePVsModalClose').addEventListener('click', function() { modal.close(); });
+            document.getElementById('removePVsBtn').addEventListener('click', function() { removeSelectedPVs(); modal.close(); });
         });
     </script>
-</div>
+</dialog>
 
 <script type="text/javascript" src="archViewer.js"></script>
 
