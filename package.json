@@ -1,8 +1,7 @@
 {
   "name": "svg_viewer",
   "version": "1.0.0",
-  "description": "This is a web based viewer for the EPICS Archiver Appliance that uses SVG instead of Canvas with the potential to use WebGL in the future.",
-  "main": "archViewer.js",
+  "description": "The SVG Viewer is a web-based application for displaying process variables (PVs) stored by the EPICS Archiver Appliance (https://epicsarchiver.readthedocs.io/).",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
