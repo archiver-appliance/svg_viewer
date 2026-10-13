@@ -39,4 +39,3 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${GITHUB_REF_NAME}" --generate-notes "svg-viewer-${GITHUB_REF_NAME}.zip"
-

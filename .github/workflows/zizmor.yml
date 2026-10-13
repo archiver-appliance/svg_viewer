@@ -24,4 +24,3 @@ jobs:
         with:
           version: 1.25.2
           advanced-security: ${{ github.event_name == 'push' }}
-
