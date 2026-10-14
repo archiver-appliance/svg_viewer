@@ -136,7 +136,7 @@ function parseURLParameters() {
   ) {
     queries = queryString.substring(1).split("&");
     for (i = 0, l = queries.length; i < l; i++) {
-      var parts = queries[i].split("="),
+      let parts = queries[i].split("="),
         name = parts[0],
         val = decodeURIComponent(parts[1]);
       // console.log("Name="+name+"Val="+val);
@@ -261,7 +261,7 @@ function getEstimatedRawSamples() {
 
 // Enum for the various type of X axis changes; to provide a "smooth" panning experience, we treat that specially.
 // All other options are usually delete/replace traces.
-var XAxis_Change_Type = {
+let XAxis_Change_Type = {
   NewPlot: 1,
   ReplaceTraces: 2,
   LeftPan: 3,
@@ -282,7 +282,7 @@ function determineBinSize() {
     viewerVars.binSize = 0;
     return;
   }
-  var potentialBinSizes = [
+  let potentialBinSizes = [
     5, 10, 15, 30, 60, 120, 180, 300, 600, 1200, 1800, 3600, 7200, 14400, 21600,
     43200, 86400,
   ];
@@ -516,7 +516,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
         if (!("axis" in viewerVars.pvData[pvName])) {
           continue;
         }
-        var isWaveform = data["meta"]["waveform"];
+        let isWaveform = data["meta"]["waveform"];
         if (isWaveform) {
           // Escape hatch for waveforms...
           if (viewerVars.pvs.length > 1) {
@@ -680,7 +680,7 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
         });
       } else {
         // We have already created the plotly object; use add/delete API's
-        var updateXs = [],
+        let updateXs = [],
           updateYs = [],
           updateIndices = [],
           newTraces = [],
@@ -737,10 +737,10 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
                   viewerVars.pvData[pvName].traceIndex,
               );
               // Add the new axis if it does not exist in the layout already.
-              var longAxisName =
+              let longAxisName =
                 viewerVars.y_short_2_long[viewerVars.pvData[pvName].axis];
               if (!(longAxisName in myDiv.layout)) {
-                var layoutChanges = getLayoutChangesForMultipleYAxes(
+                let layoutChanges = getLayoutChangesForMultipleYAxes(
                   myDiv.layout,
                 );
                 Plotly.relayout(myDiv, layoutChanges)
@@ -1049,13 +1049,13 @@ function updateXAxisTitle() {
 // If the PV has a .DESC, we add that as a tooltip to the PV's legend.
 function addToolTipsToTraceLegends() {
   $("g.legend g.traces").each(function () {
-    var pvName = $(this).children(".legendtext").attr("data-unformatted");
-    var ttipText =
+    let pvName = $(this).children(".legendtext").attr("data-unformatted");
+    let ttipText =
       _.get(viewerVars.pvData[pvName], "DESC", "") +
       "  -  (" +
       _.get(viewerVars.pvData[pvName], "egu", "N/A") +
       ")";
-    var ttip = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    let ttip = document.createElementNS("http://www.w3.org/2000/svg", "title");
     ttip.appendChild(document.createTextNode(ttipText));
     $(this)[0].appendChild(ttip);
   });
@@ -1212,13 +1212,13 @@ function toggleLinearLogScale(egu) {
 function getCurrentDataAsDict() {
   function naArray(len) {
     var ret = [];
-    for (var i in len) {
+    for (let i in len) {
       ret.push("N/A");
     }
     return ret;
   }
 
-  var tbl = {};
+  let tbl = {};
   var names = [];
   if (viewerVars.plotType == viewerVars.plotTypeEnum.SCATTER_2D) {
     for (i in myDiv.data) {
@@ -1251,7 +1251,7 @@ function getCurrentDataAsDict() {
         tbl[t][k] = val[k];
       }
     }
-    for (var n = 1; n < maxColumnNum; n++) {
+    for (let n = 1; n < maxColumnNum; n++) {
       names.push(n);
     }
     return [names, tbl];
@@ -1660,7 +1660,7 @@ $(document).ready(function () {
   });
 
   $(document).on("paste", function (ev) {
-    var pvName = ev.originalEvent.clipboardData.getData("text/plain").trim();
+    let pvName = ev.originalEvent.clipboardData.getData("text/plain").trim();
     if (typeof pvName !== "undefined" && pvName && pvName.length > 2) {
       console.log("Pasting PV from clipboard event " + pvName);
       addTraceForNewPVs([
@@ -1671,7 +1671,7 @@ $(document).ready(function () {
 
   // There is a big SVG drag area over much of the plot; so we do this to determine if the user has clicked on some plot element.
   $(document).click(function (e) {
-    for (var shortName in viewerVars.axis2egu) {
+    for (let shortName in viewerVars.axis2egu) {
       // Check to see if the user clicked on one of the y-axes
       var axisObj = $("." + viewerVars.y_short_2_axisclass[shortName])[0];
       if (typeof axisObj == "undefined") continue;
@@ -1692,7 +1692,7 @@ $(document).ready(function () {
     if (typeof xaxisDom !== "undefined") {
       // Check to see if the user clicked on one of the x-axis components
       var bRect = xaxisDom.getBoundingClientRect();
-      var leftOffset = bRect.left + window.scrollX,
+      let leftOffset = bRect.left + window.scrollX,
         topOffset = bRect.top + window.scrollY;
       if (
         e.pageX >= leftOffset &&
@@ -1701,13 +1701,14 @@ $(document).ready(function () {
         e.pageY <= topOffset + bRect.height
       ) {
         // console.log("We are within the X-Axis label now");
+        let ppl, bnl;
         try {
-          var ppl = xaxisDom.children[0].getBBox().x;
-          var bnl = ppl + xaxisDom.children[0].getComputedTextLength();
+          ppl = xaxisDom.children[0].getBBox().x;
+          bnl = ppl + xaxisDom.children[0].getComputedTextLength();
         } finally {
-          var ppl =
+          ppl =
             xaxisDom.children[0].getBoundingClientRect().left + window.scrollX;
-          var bnl = ppl + xaxisDom.children[0].getComputedTextLength();
+          bnl = ppl + xaxisDom.children[0].getComputedTextLength();
         }
         if (e.pageX >= ppl && e.pageX <= bnl) {
           // Toggle between the various operators; note that this is a global operation for now and applies to all PV's
