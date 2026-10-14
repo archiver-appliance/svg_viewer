@@ -1712,7 +1712,7 @@ $(document).ready(function () {
         }
         if (e.pageX >= ppl && e.pageX <= bnl) {
           // Toggle between the various operators; note that this is a global operation for now and applies to all PV's
-          var nextBinningOperator =
+          let nextBinningOperator =
             viewerVars.binningOperatorsList[
               (viewerVars.binningOperatorsList.indexOf(
                 viewerVars.currentBinningOperator,
