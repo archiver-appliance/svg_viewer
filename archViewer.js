@@ -1268,7 +1268,7 @@ function showChartDataAsText() {
     names.join("</th><th>") +
     "</th></tr>\n";
   Object.keys(tbl)
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
     .forEach(function (key) {
       htmlContent +=
         "<tr><td>" +
@@ -1285,7 +1285,9 @@ function showChartDataAsText() {
 function exportToCSV() {
   let d = getCurrentDataAsDict();
   let names = d[0];
-  let tbl = Object.fromEntries(Object.entries(d[1]).sort());
+  let tbl = Object.fromEntries(
+    Object.entries(d[1]).sort(([a], [b]) => a.localeCompare(b)),
+  );
   if (viewerVars.replaceNA) {
     let memoTbl = Array.from(tbl[Object.keys(tbl)[0]]);
     let firstTbl = Array.from(tbl[Object.keys(tbl)[0]]);
