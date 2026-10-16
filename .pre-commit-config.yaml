@@ -23,4 +23,3 @@ repos:
       - id: prettier
         types_or: [html, css, javascript]
         exclude: ^lib/
-
