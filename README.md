@@ -11,7 +11,7 @@ python viewerProxy.py
 ```
 By default, the script listens on port ```8080``` and forwards requests to the local host. If the Archiver Appliance instance is located elsewhere and/or listens on a different port, additional parameters can be provided to configure the script accordingly. For example:
 ```
-python viewerProxy.py --retrievalURL http://archiver-appliance:17668/retrieval --port 7878
+python viewerProxy.py 7878 http://archiver-appliance:17668/retrieval
 ```
 
 ## 2. nginx.conf
