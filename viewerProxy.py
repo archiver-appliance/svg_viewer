@@ -21,11 +21,15 @@ The viewer URL then becomes http://your_web_server/archiveviewer/retrieval/ui/vi
 
 import socketserver
 import http.server
-from urllib import request
+from urllib import request, parse
 import argparse
 
+# set default values for the port and URL
 port = 16000
 retrievalURL = 'http://localhost:17668/retrieval'
+
+# set allowed paths (to avoid path/directory traversal security issues)
+ALLOWED_PATHS = {'/retrieval/data/getData.qw': '/data/getData.qw', '/retrieval/bpl/getMatchingPVs': '/bpl/getMatchingPVs'}
 
 class Proxy(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -35,7 +39,12 @@ class Proxy(http.server.SimpleHTTPRequestHandler):
             self.path = filename
             http.server.SimpleHTTPRequestHandler.do_GET(self)
         else:
-            proxiedurl = retrievalURL + self.path[len('/retrieval'):]
+            parts = parse.urlsplit(self.path)
+            target = ALLOWED_PATHS.get(parts.path)
+            if target is None:
+                self.send_error(404)
+                return
+            proxiedurl = retrievalURL + target + '?' + parts.query
             print(proxiedurl)
             self.copyfile(request.urlopen(proxiedurl), self.wfile)
 
