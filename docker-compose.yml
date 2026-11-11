@@ -5,5 +5,5 @@ services:
       - "${LISTENING_PORT:-8080}:${LISTENING_PORT:-8080}"
     environment:
       LISTENING_PORT: "${LISTENING_PORT:-8080}"
-      HOST_NAME: "${HOST_NAME:-http://remote-archiver-appliance.ess.eu:17668/retrieval/}"
+      ARCHIVER_DATA_RETRIEVAL_URL: "${ARCHIVER_DATA_RETRIEVAL_URL:-http://localhost:17668/retrieval}"
     restart: unless-stopped
