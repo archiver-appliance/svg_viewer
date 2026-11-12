@@ -1,321 +1,537 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EPICS Archiver Appliance</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EPICS Archiver Appliance</title>
 
+    <link
+      href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="node_modules/noty/lib/noty.css" rel="stylesheet" />
+    <link href="css/archiver.css" rel="stylesheet" />
 
-<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="node_modules/noty/lib/noty.css" rel="stylesheet">
-<link href="css/archiver.css" rel="stylesheet">
-
-
-<script src="node_modules/lodash/lodash.min.js"></script>
-<script src="node_modules/plotly.js-dist-min/plotly.min.js"></script>
-<script src="node_modules/moment/moment.js"></script>
-<script src="node_modules/mustache/mustache.min.js"></script>
-<script src="node_modules/noty/lib/noty.min.js"></script>
-
-</head>
-<body>
-
-<div id="wrapper" ondrop="drop(event)" ondragover="allowDrop(event)">
-
-
-
-
-
-
-<div id="appContainer">
-
-<div id="pvSidebar">
-    <div class="sidebar-header">
-        <div class="sidebar-title">PVs</div>
-        <input
-            id="pvSidebarSearch"
-            class="sidebar-search"
-            type="text"
-            placeholder="Search…"
-            autocomplete="off"
-            spellcheck="false"
-        />
-        <button id="pvSidebarToggle" title="Unpin sidebar" data-icon="pin"></button>
-    </div>
-    <div class="sidebar-status" id="pvSidebarStatus"></div>
-    <div class="sidebar-list" id="pvSidebarList"></div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section-header">
-        <span class="sidebar-section-title">On Plot</span>
-        <span class="sidebar-section-count" id="pvSelectedCount"></span>
-    </div>
-    <div class="sidebar-list" id="pvSelectedList"></div>
-    <div class="sidebar-selected-actions" id="pvSelectedActions">
-        <button id="pvSelectAll"   class="sidebar-action-btn" disabled>Select All</button>
-        <button id="pvUnselectAll" class="sidebar-action-btn" disabled>Unselect All</button>
-        <button id="pvRemove"      class="sidebar-action-btn sidebar-action-btn-danger" disabled>Remove</button>
-    </div>
-</div>
-
-<div id="mainPanel">
-<div id="dateRangeBar">
-        <span class="date-range-label">Start</span>
-        <div class="date-range-picker-wrap">
-            <input type="text" id="dialog_startTime" class="date-range-input" autocomplete="off" spellcheck="false" placeholder="YYYY/MM/DD HH:mm:ss"/>
-            <button class="date-range-icon" id="startTimeTrigger" title="Pick date" data-icon="calendar"></button>
-            <input type="datetime-local" id="startTimePicker" class="date-picker-hidden" step="1" tabindex="-1"/>
+    <script src="node_modules/lodash/lodash.min.js"></script>
+    <script src="node_modules/plotly.js-dist-min/plotly.min.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/mustache/mustache.min.js"></script>
+    <script src="node_modules/noty/lib/noty.min.js"></script>
+  </head>
+  <body>
+    <div id="wrapper" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <div id="appContainer">
+        <div id="pvSidebar">
+          <div class="sidebar-header">
+            <div class="sidebar-title">PVs</div>
+            <input
+              id="pvSidebarSearch"
+              class="sidebar-search"
+              type="text"
+              placeholder="Search…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button
+              id="pvSidebarToggle"
+              title="Unpin sidebar"
+              data-icon="pin"
+            ></button>
+          </div>
+          <div class="sidebar-status" id="pvSidebarStatus"></div>
+          <div class="sidebar-list" id="pvSidebarList"></div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-section-header">
+            <span class="sidebar-section-title">On Plot</span>
+            <span class="sidebar-section-count" id="pvSelectedCount"></span>
+          </div>
+          <div class="sidebar-list" id="pvSelectedList"></div>
+          <div class="sidebar-selected-actions" id="pvSelectedActions">
+            <button id="pvSelectAll" class="sidebar-action-btn" disabled>
+              Select All
+            </button>
+            <button id="pvUnselectAll" class="sidebar-action-btn" disabled>
+              Unselect All
+            </button>
+            <button
+              id="pvRemove"
+              class="sidebar-action-btn sidebar-action-btn-danger"
+              disabled
+            >
+              Remove
+            </button>
+          </div>
         </div>
-        <span class="date-range-label">End</span>
-        <div class="date-range-picker-wrap">
-            <input type="text" id="dialog_endTime" class="date-range-input" autocomplete="off" spellcheck="false" placeholder="YYYY/MM/DD HH:mm:ss"/>
-            <button class="date-range-icon" id="endTimeTrigger" title="Pick date" data-icon="calendar"></button>
-            <input type="datetime-local" id="endTimePicker" class="date-picker-hidden" step="1" tabindex="-1"/>
-        </div>
-        <div id="rangeButtons"></div>
-        <div id="liveControls">
-            <input id="timeInput" type="number" min="1" value="7" class="live-interval-input" disabled />
-            <select id="unitInput" class="live-unit-select" disabled>
+
+        <div id="mainPanel">
+          <div id="dateRangeBar">
+            <span class="date-range-label">Start</span>
+            <div class="date-range-picker-wrap">
+              <input
+                type="text"
+                id="dialog_startTime"
+                class="date-range-input"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="YYYY/MM/DD HH:mm:ss"
+              />
+              <button
+                class="date-range-icon"
+                id="startTimeTrigger"
+                title="Pick date"
+                data-icon="calendar"
+              ></button>
+              <input
+                type="datetime-local"
+                id="startTimePicker"
+                class="date-picker-hidden"
+                step="1"
+                tabindex="-1"
+              />
+            </div>
+            <span class="date-range-label">End</span>
+            <div class="date-range-picker-wrap">
+              <input
+                type="text"
+                id="dialog_endTime"
+                class="date-range-input"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="YYYY/MM/DD HH:mm:ss"
+              />
+              <button
+                class="date-range-icon"
+                id="endTimeTrigger"
+                title="Pick date"
+                data-icon="calendar"
+              ></button>
+              <input
+                type="datetime-local"
+                id="endTimePicker"
+                class="date-picker-hidden"
+                step="1"
+                tabindex="-1"
+              />
+            </div>
+            <div id="rangeButtons"></div>
+            <div id="liveControls">
+              <input
+                id="timeInput"
+                type="number"
+                min="1"
+                value="7"
+                class="live-interval-input"
+                disabled
+              />
+              <select id="unitInput" class="live-unit-select" disabled>
                 <option value="second">second(s)</option>
                 <option value="minute" selected>minute(s)</option>
                 <option value="hour">hour(s)</option>
                 <option value="day">day(s)</option>
-            </select>
-        </div>
-        <div id="chartTools">
-            <button class="action-btn" id="toolPan" title="Pan" data-icon="pan"></button>
-            <button class="action-btn active" id="toolZoom" title="Zoom" data-icon="zoom"></button>
-            <button class="action-btn" id="toolZoomIn" title="Zoom in" data-icon="zoom-in"></button>
-            <button class="action-btn" id="toolZoomOut" title="Zoom out" data-icon="zoom-out"></button>
-            <button class="action-btn" id="toolReset" title="Autoscale / Reset axes" data-icon="reset"></button>
-            <button class="action-btn" id="actionYAxes" title="Specify ranges for the Y axes" data-icon="y-axes"></button>
-            <button class="action-btn" id="actionFullscreen" title="Fullscreen" data-icon="fullscreen"></button>
-        </div>
-        <div id="actionButtons">
-            <button class="action-btn" id="toolSavePng" title="Export plot as a PNG" data-icon="camera"></button>
-            <button class="action-btn" id="actionExportCSV" title="Export data as a CSV" data-icon="download"></button>
-            <button class="action-btn" id="actionLink" title="Copy link to current view to clipboard" data-icon="link"></button>
-            <button class="action-btn" id="actionElog" title="Post to elog" style="display:none" data-icon="upload"></button>
-        </div>
-        <button id="dateRangeBarToggle" title="Unpin top bar" data-icon="pin"></button>
-        <script type="text/javascript">
-            document.addEventListener('DOMContentLoaded', function () {
-                document.getElementById('dialog_startTime').addEventListener('change', startAndEndTimeSelected);
-                document.getElementById('dialog_endTime').addEventListener('change', startAndEndTimeSelected);
-                document.getElementById('dialog_startTime').addEventListener('keydown', function(e) {
-                    if (e.keyCode == 13) { e.preventDefault(); startAndEndTimeSelected(); }
-                });
-                document.getElementById('dialog_endTime').addEventListener('keydown', function(e) {
-                    if (e.keyCode == 13) { e.preventDefault(); startAndEndTimeSelected(); }
-                });
+              </select>
+            </div>
+            <div id="chartTools">
+              <button
+                class="action-btn"
+                id="toolPan"
+                title="Pan"
+                data-icon="pan"
+              ></button>
+              <button
+                class="action-btn active"
+                id="toolZoom"
+                title="Zoom"
+                data-icon="zoom"
+              ></button>
+              <button
+                class="action-btn"
+                id="toolZoomIn"
+                title="Zoom in"
+                data-icon="zoom-in"
+              ></button>
+              <button
+                class="action-btn"
+                id="toolZoomOut"
+                title="Zoom out"
+                data-icon="zoom-out"
+              ></button>
+              <button
+                class="action-btn"
+                id="toolReset"
+                title="Autoscale / Reset axes"
+                data-icon="reset"
+              ></button>
+              <button
+                class="action-btn"
+                id="actionYAxes"
+                title="Specify ranges for the Y axes"
+                data-icon="y-axes"
+              ></button>
+              <button
+                class="action-btn"
+                id="actionFullscreen"
+                title="Fullscreen"
+                data-icon="fullscreen"
+              ></button>
+            </div>
+            <div id="actionButtons">
+              <button
+                class="action-btn"
+                id="toolSavePng"
+                title="Export plot as a PNG"
+                data-icon="camera"
+              ></button>
+              <button
+                class="action-btn"
+                id="actionExportCSV"
+                title="Export data as a CSV"
+                data-icon="download"
+              ></button>
+              <button
+                class="action-btn"
+                id="actionLink"
+                title="Copy link to current view to clipboard"
+                data-icon="link"
+              ></button>
+              <button
+                class="action-btn"
+                id="actionElog"
+                title="Post to elog"
+                style="display: none"
+                data-icon="upload"
+              ></button>
+            </div>
+            <button
+              id="dateRangeBarToggle"
+              title="Unpin top bar"
+              data-icon="pin"
+            ></button>
+            <script type="text/javascript">
+              document.addEventListener("DOMContentLoaded", function () {
+                document
+                  .getElementById("dialog_startTime")
+                  .addEventListener("change", startAndEndTimeSelected);
+                document
+                  .getElementById("dialog_endTime")
+                  .addEventListener("change", startAndEndTimeSelected);
+                document
+                  .getElementById("dialog_startTime")
+                  .addEventListener("keydown", function (e) {
+                    if (e.keyCode == 13) {
+                      e.preventDefault();
+                      startAndEndTimeSelected();
+                    }
+                  });
+                document
+                  .getElementById("dialog_endTime")
+                  .addEventListener("keydown", function (e) {
+                    if (e.keyCode == 13) {
+                      e.preventDefault();
+                      startAndEndTimeSelected();
+                    }
+                  });
                 function wireDatePicker(textId, pickerId, triggerId) {
-                    var picker  = document.getElementById(pickerId);
-                    var trigger = document.getElementById(triggerId);
-                    trigger.addEventListener('click', function() {
-                        var current = moment(document.getElementById(textId).value, "YYYY/MM/DD HH:mm:ss");
-                        if (current.isValid()) { picker.value = current.format("YYYY-MM-DDTHH:mm:ss"); }
-                        picker.showPicker();
-                    });
-                    picker.addEventListener('change', function() {
-                        if (this.value) {
-                            document.getElementById(textId).value = moment(this.value).format("YYYY/MM/DD HH:mm:ss");
-                            startAndEndTimeSelected();
-                        }
-                    });
+                  var picker = document.getElementById(pickerId);
+                  var trigger = document.getElementById(triggerId);
+                  trigger.addEventListener("click", function () {
+                    var current = moment(
+                      document.getElementById(textId).value,
+                      "YYYY/MM/DD HH:mm:ss",
+                    );
+                    if (current.isValid()) {
+                      picker.value = current.format("YYYY-MM-DDTHH:mm:ss");
+                    }
+                    picker.showPicker();
+                  });
+                  picker.addEventListener("change", function () {
+                    if (this.value) {
+                      document.getElementById(textId).value = moment(
+                        this.value,
+                      ).format("YYYY/MM/DD HH:mm:ss");
+                      startAndEndTimeSelected();
+                    }
+                  });
                 }
-                wireDatePicker('dialog_startTime', 'startTimePicker', 'startTimeTrigger');
-                wireDatePicker('dialog_endTime',   'endTimePicker',   'endTimeTrigger');
+                wireDatePicker(
+                  "dialog_startTime",
+                  "startTimePicker",
+                  "startTimeTrigger",
+                );
+                wireDatePicker(
+                  "dialog_endTime",
+                  "endTimePicker",
+                  "endTimeTrigger",
+                );
                 renderRangeButtons();
-                document.getElementById('unitInput').addEventListener('change', showAdvancedView);
-                document.getElementById('timeInput').addEventListener('change', showAdvancedView);
-                document.getElementById('timeInput').addEventListener('blur', function() {
+                document
+                  .getElementById("unitInput")
+                  .addEventListener("change", showAdvancedView);
+                document
+                  .getElementById("timeInput")
+                  .addEventListener("change", showAdvancedView);
+                document
+                  .getElementById("timeInput")
+                  .addEventListener("blur", function () {
                     if (!this.value || parseInt(this.value) < 1) this.value = 1;
                     showAdvancedView();
-                });
-                document.getElementById('timeInput').addEventListener('keydown', function(e) {
+                  });
+                document
+                  .getElementById("timeInput")
+                  .addEventListener("keydown", function (e) {
                     if (e.keyCode == 13) {
-                        e.preventDefault();
-                        if (!this.value || parseInt(this.value) < 1) this.value = 1;
-                        showAdvancedView();
+                      e.preventDefault();
+                      if (!this.value || parseInt(this.value) < 1)
+                        this.value = 1;
+                      showAdvancedView();
                     }
-                });
-                document.getElementById('actionExportCSV').addEventListener('click', exportToCSV);
-                document.getElementById('actionLink').addEventListener('click', copyLinkToClipboard);
-                document.getElementById('actionYAxes').addEventListener('click', showYAxesRangeModal);
-                document.getElementById('actionFullscreen').addEventListener('click', toggleFullscreen);
-                document.getElementById('actionElog').addEventListener('click', showElogModal);
-                document.querySelectorAll('[data-icon]').forEach(function(btn) {
-                    fetch('icons/' + btn.dataset.icon + '.svg')
-                        .then(function(r) { return r.text(); })
-                        .then(function(svg) { btn.innerHTML = svg; });
-                });
+                  });
+                document
+                  .getElementById("actionExportCSV")
+                  .addEventListener("click", exportToCSV);
+                document
+                  .getElementById("actionLink")
+                  .addEventListener("click", copyLinkToClipboard);
+                document
+                  .getElementById("actionYAxes")
+                  .addEventListener("click", showYAxesRangeModal);
+                document
+                  .getElementById("actionFullscreen")
+                  .addEventListener("click", toggleFullscreen);
+                document
+                  .getElementById("actionElog")
+                  .addEventListener("click", showElogModal);
+                document
+                  .querySelectorAll("[data-icon]")
+                  .forEach(function (btn) {
+                    fetch("icons/" + btn.dataset.icon + ".svg")
+                      .then(function (r) {
+                        return r.text();
+                      })
+                      .then(function (svg) {
+                        btn.innerHTML = svg;
+                      });
+                  });
+              });
+            </script>
+          </div>
+          <div id="archViewer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!--  Choose bin size  -->
+    <dialog id="binSizeModal" aria-labelledby="binSizeModalTitle">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" id="binSizeModalClose">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title" id="binSizeModalTitle">
+              Choose a bin size (in seconds):
+            </h4>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <form class="form-horizontal" role="form">
+              <div class="form-group">
+                <div class="input-group">
+                  <span class="input-group-addon">Bin Size(s):</span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="binSizeInput"
+                    placeholder="300"
+                  />
+                </div>
+              </div>
+            </form>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" id="binSizeDone">
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+          var modal = document.getElementById("binSizeModal");
+          modal.addEventListener("close", fixBinSize);
+          document
+            .getElementById("binSizeModalClose")
+            .addEventListener("click", function () {
+              modal.close();
             });
-        </script>
-    </div>
-    <div id="archViewer"></div>
-</div>
-
-</div>
-
-
-</div>
-
-<!--  Choose bin size  -->
-<dialog id="binSizeModal" aria-labelledby="binSizeModalTitle">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" id="binSizeModalClose">
-                       <span aria-hidden="true">&times;</span>
-                       <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="binSizeModalTitle">
-                    Choose a bin size (in seconds):
-                </h4>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form class="form-horizontal" role="form">
-                  <div class="form-group">
-                  	<div class='input-group'>
-                	  <span class="input-group-addon">Bin Size(s):</span>
-                      <input type="text" class="form-control" id="binSizeInput" placeholder="300"/>
-                      </div>
-                  </div>
-                </form>
-                <div class="modal-footer">
-        			<button type="button" class="btn btn-default" id="binSizeDone">Done</button>
-      			</div>
-            </div>
-        </div>
-    </div>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById('binSizeModal');
-            modal.addEventListener('close', fixBinSize);
-            document.getElementById('binSizeModalClose').addEventListener('click', function() { modal.close(); });
-            document.getElementById('binSizeDone').addEventListener('click', function() { modal.close(); });
-            document.getElementById('binSizeInput').addEventListener('keydown', function(e) {
-                if (e.keyCode == 13) { e.preventDefault(); modal.close(); }
+          document
+            .getElementById("binSizeDone")
+            .addEventListener("click", function () {
+              modal.close();
+            });
+          document
+            .getElementById("binSizeInput")
+            .addEventListener("keydown", function (e) {
+              if (e.keyCode == 13) {
+                e.preventDefault();
+                modal.close();
+              }
             });
         });
-    </script>
-</dialog>
+      </script>
+    </dialog>
 
-
-
-
-
-<!--  Comment for elog  -->
-<dialog id="elogModal" aria-labelledby="elogModalTitle">
-    <div class="modal-dialog">
+    <!--  Comment for elog  -->
+    <dialog id="elogModal" aria-labelledby="elogModalTitle">
+      <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" id="elogModalClose">
-                       <span aria-hidden="true">&times;</span>
-                       <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="elogModalTitle">
-                    Post to the elog:
-                </h4>
-            </div>
+          <div class="modal-header">
+            <button type="button" class="close" id="elogModalClose">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title" id="elogModalTitle">Post to the elog:</h4>
+          </div>
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form class="form-horizontal" role="form">
-                  <div class="form-group"><textarea rows="5" class="form-control" id="elogComment" placeholder="Please add a comment for the eLog" ></textarea></div>
-                </form>
-                <div class="modal-footer">
-        			<button type="button" class="btn btn-default" id="elogPost">Post</button>
-      			</div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <form class="form-horizontal" role="form">
+              <div class="form-group">
+                <textarea
+                  rows="5"
+                  class="form-control"
+                  id="elogComment"
+                  placeholder="Please add a comment for the eLog"
+                ></textarea>
+              </div>
+            </form>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" id="elogPost">
+                Post
+              </button>
             </div>
+          </div>
         </div>
-    </div>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById('elogModal');
-            document.getElementById('elogModalClose').addEventListener('click', function() { modal.close(); });
-            document.getElementById('elogPost').addEventListener('click', function() { postToELog(); modal.close(); });
+      </div>
+      <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+          var modal = document.getElementById("elogModal");
+          document
+            .getElementById("elogModalClose")
+            .addEventListener("click", function () {
+              modal.close();
+            });
+          document
+            .getElementById("elogPost")
+            .addEventListener("click", function () {
+              postToELog();
+              modal.close();
+            });
         });
-    </script>
-</dialog>
+      </script>
+    </dialog>
 
-<!--  Ranges for the Y-Axes  -->
-<dialog id="yAxesModal" aria-labelledby="yAxesModalTitle">
-    <div class="modal-dialog">
+    <!--  Ranges for the Y-Axes  -->
+    <dialog id="yAxesModal" aria-labelledby="yAxesModalTitle">
+      <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" id="yAxesModalClose">
-                       <span aria-hidden="true">&times;</span>
-                       <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="yAxesModalTitle">
-                    Specify ranges for the Y Axes based on EGU's:
-                </h4>
-            </div>
+          <div class="modal-header">
+            <button type="button" class="close" id="yAxesModalClose">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title" id="yAxesModalTitle">
+              Specify ranges for the Y Axes based on EGU's:
+            </h4>
+          </div>
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form class="form-horizontal" role="form">
-                    <table class="table table-striped table-bordered">
-                        <thead><tr><th>EGU</th><th>Min</th><th>Max</th></tr></thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </form>
-                <div class="modal-footer">
-        			<button type="button" class="btn btn-default" id="yAxesPost">Set Ranges</button>
-      			</div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <form class="form-horizontal" role="form">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>EGU</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </form>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" id="yAxesPost">
+                Set Ranges
+              </button>
             </div>
+          </div>
         </div>
-    </div>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById('yAxesModal');
-            document.getElementById('yAxesModalClose').addEventListener('click', function() { modal.close(); });
-            document.getElementById('yAxesPost').addEventListener('click', function() { applyYAxesRanges(); modal.close(); });
+      </div>
+      <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+          var modal = document.getElementById("yAxesModal");
+          document
+            .getElementById("yAxesModalClose")
+            .addEventListener("click", function () {
+              modal.close();
+            });
+          document
+            .getElementById("yAxesPost")
+            .addEventListener("click", function () {
+              applyYAxesRanges();
+              modal.close();
+            });
         });
-    </script>
-</dialog>
+      </script>
+    </dialog>
 
-<!--  remove PVs  -->
-<dialog id="removePVsModal" aria-labelledby="removePVsModalTitle">
-    <div class="modal-dialog">
+    <!--  remove PVs  -->
+    <dialog id="removePVsModal" aria-labelledby="removePVsModalTitle">
+      <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" id="removePVsModalClose">
-                       <span aria-hidden="true">&times;</span>
-                       <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="removePVsModalTitle">
-                    Remove selected PVs
-                </h4>
-            </div>
+          <div class="modal-header">
+            <button type="button" class="close" id="removePVsModalClose">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title" id="removePVsModalTitle">
+              Remove selected PVs
+            </h4>
+          </div>
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form class="form-horizontal" role="form">
-                    <div class="checkboxlist">
-                    </div>
-                </form>
-            </div>
-             <div class="modal-footer">
-     			<button type="button" class="btn btn-default" id="removePVsBtn">Remove</button>
-   			</div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <form class="form-horizontal" role="form">
+              <div class="checkboxlist"></div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" id="removePVsBtn">
+              Remove
+            </button>
+          </div>
         </div>
-    </div>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById('removePVsModal');
-            document.getElementById('removePVsModalClose').addEventListener('click', function() { modal.close(); });
-            document.getElementById('removePVsBtn').addEventListener('click', function() { removeSelectedPVs(); modal.close(); });
+      </div>
+      <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+          var modal = document.getElementById("removePVsModal");
+          document
+            .getElementById("removePVsModalClose")
+            .addEventListener("click", function () {
+              modal.close();
+            });
+          document
+            .getElementById("removePVsBtn")
+            .addEventListener("click", function () {
+              removeSelectedPVs();
+              modal.close();
+            });
         });
-    </script>
-</dialog>
+      </script>
+    </dialog>
 
-<script type="text/javascript" src="archViewer.js"></script>
-
-</body>
+    <script type="text/javascript" src="archViewer.js"></script>
+  </body>
 </html>

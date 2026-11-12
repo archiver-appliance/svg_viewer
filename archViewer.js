@@ -769,7 +769,7 @@ function processChangesOnXAxis(eventdata) {
 				let buttonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
 				viewerVars.selectorOptions.buttons[buttonIndex].step = 'minute';
 				viewerVars.selectorOptions.buttons[buttonIndex].count = 7;
-			
+
 				let layoutChanges = {'xaxis' : { 'autorange' : false}};
 				layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
 				layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
