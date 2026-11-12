@@ -46,9 +46,6 @@ viewerVars.timerIndexFor3DAnimation = -1;
 viewerVars.icons = {};
 // We take a snapshot of the gd before showing the comment modal. This is stored here
 viewerVars.currentSnapshot = null;
-<<<<<<< HEAD
-viewerVars.currentButton = '';
-=======
 viewerVars.currentButton = "";
 
 // last interval choice
@@ -56,7 +53,6 @@ let lastInterval = null;
 // last time unit choice
 let lastUnit = null;
 
->>>>>>> origin/master
 // This is one of the integration points with the server.
 // This should default to a path relative location that works from the appliance UI.
 // To develop/debug, override this to a absolute URL of the server with the data you are going to use for debugging/developing.
@@ -68,14 +64,6 @@ viewerVars.postToElogURL = "../../../postToElog";
 
 viewerVars.siteSupportsPostToElog = false;
 
-<<<<<<< HEAD
-fetch("../../../site_params.json")
-	.then(function(r) { return r.json(); })
-	.then(function(site_params) {
-		viewerVars.siteSupportsPostToElog = _.get(site_params, "siteSupportsPostToElog", false);
-	})
-	.catch(function() {});
-=======
 $.get("../../../site_params.json").done(function (site_params) {
   viewerVars.siteSupportsPostToElog = _.get(
     site_params,
@@ -83,7 +71,6 @@ $.get("../../../site_params.json").done(function (site_params) {
     false,
   );
 });
->>>>>>> origin/master
 
 // Google finance like list of time windows..
 viewerVars.selectorOptions = {
@@ -125,360 +112,7 @@ if (window.screen.availHeight > window.screen.availWidth) {
   };
 }
 
-<<<<<<< HEAD
-
-// hide built-in Plotly range selector — this is done with specific buttons in the date bar
-viewerVars.selectorOptions.visible = false;
-
-
-// calculate available vertical space
-function plotAreaHeight() {
-    var bar = document.getElementById('dateRangeBar');
-    return window.innerHeight - (bar ? bar.offsetHeight : 0);
-}
-
-
-// implement PV sidebar
-(function () {
-    var searchTimer = null;
-    var DEBOUNCE_MS = 350;
-
-    function setStatus(msg) {
-        document.getElementById('pvSidebarStatus').textContent = msg;
-    }
-
-    function isOnPlot(pvName) {
-        return viewerVars.pvs.indexOf(pvName) >= 0;
-    }
-
-    function refreshActiveStates() {
-        document.querySelectorAll('#pvSidebarList .pv-item').forEach(function (el) {
-            var pv = el.getAttribute('data-pv');
-            el.classList.toggle('active', isOnPlot(pv));
-        });
-
-		var pvs = viewerVars.pvs;
-    }
-
-    function renderSelectedList() {
-        var list = document.getElementById('pvSelectedList');
-        var countEl = document.getElementById('pvSelectedCount');
-        var pvs = viewerVars.pvs;
-        countEl.textContent = '(' + pvs.length + ')';
-        list.innerHTML = '';
-        if (pvs.length === 0) {
-			document.getElementById('pvSelectAll').disabled = true;
-			document.getElementById('pvUnselectAll').disabled = true;
-			document.getElementById('pvRemove').disabled = true;
-			updateVisibility();
-            return;
-        }
-        updateVisibility();
-		document.getElementById('pvSelectAll').disabled = false;
-		document.getElementById('pvUnselectAll').disabled = false;
-		document.getElementById('pvRemove').disabled = true;
-        var frag = document.createDocumentFragment();
-        pvs.forEach(function (pv) {
-            var el = document.createElement('div');
-            el.className = 'pv-item';
-            el.setAttribute('data-pv', pv);
-            el.title = pv;
-            var nameSpan = document.createElement('span');
-            nameSpan.className = 'pv-item-name';
-            nameSpan.textContent = pv;
-            var cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.className = 'pv-checkbox';
-            cb.setAttribute('data-pv', pv);
-            el.addEventListener('click', function (e) {
-                if (e.target !== cb) { cb.checked = !cb.checked; }
-                updateRemoveButton();
-            });
-            cb.addEventListener('change', updateRemoveButton);
-            el.appendChild(nameSpan);
-            el.appendChild(cb);
-            frag.appendChild(el);
-        });
-        list.appendChild(frag);
-    }
-
-    function updateRemoveButton() {
-        var anyChecked = !!document.querySelector('#pvSelectedList .pv-checkbox:checked');
-        document.getElementById('pvRemove').disabled = !anyChecked;
-    }
-
-    function updateVisibility() {
-        var hasPVs = viewerVars.pvs.length > 0;
-        myDiv.style.display = hasPVs ? '' : 'none';
-		document.querySelectorAll('#dateRangeBar button:not(#dateRangeBarToggle), #dateRangeBar input:not(#timeInput), #dateRangeBar select:not(#unitInput)').forEach(function(el) {
-            el.disabled = !hasPVs;
-        });
-    }
-
-    document.getElementById('pvSelectAll').addEventListener('click', function () {
-        document.querySelectorAll('#pvSelectedList .pv-checkbox').forEach(function (cb) {
-            cb.checked = true;
-        });
-        updateRemoveButton();
-    });
-
-    document.getElementById('pvUnselectAll').addEventListener('click', function () {
-        document.querySelectorAll('#pvSelectedList .pv-checkbox').forEach(function (cb) {
-            cb.checked = false;
-        });
-        updateRemoveButton();
-    });
-
-    document.getElementById('pvRemove').addEventListener('click', function () {
-        var toRemove = [];
-        document.querySelectorAll('#pvSelectedList .pv-checkbox:checked').forEach(function (cb) {
-            toRemove.push(cb.getAttribute('data-pv'));
-        });
-        toRemove.forEach(function (pv) { removePVFromPlot(pv); });
-        if (toRemove.length) {
-            setTimeout(function () {
-                renderSelectedList();
-                refreshActiveStates();
-            }, 100);
-        }
-    });
-
-
-
-
-
-function highlightTrace(pvName) {
-    if (!myDiv || !myDiv.data || myDiv.data.length === 0) return;
-
-    var targetIdx = (viewerVars.pvData[pvName] && 'traceIndex' in viewerVars.pvData[pvName])
-        ? viewerVars.pvData[pvName].traceIndex
-        : -1;
-
-    if (targetIdx < 0) return;
-
-    // Grab the SVG trace layers directly — Plotly renders each trace
-    // into a <g class="trace ..."> inside the plot's main SVG.
-    var traceLayers = myDiv.querySelectorAll('.scatterlayer .trace');
-    if (!traceLayers.length) return;
-
-    // Dim all, highlight target
-    traceLayers.forEach(function (el, i) {
-        el.style.transition = 'opacity 0.2s ease';
-        el.style.opacity    = (i === targetIdx) ? '1' : '0.12';
-    });
-
-    // Restore after 1.8s
-    setTimeout(function () {
-        traceLayers.forEach(function (el) {
-            el.style.opacity = '1';
-        });
-    }, 1800);
-}
-
-
-
-
-    function handlePVClick(pvName) {
-        if (isOnPlot(pvName)) {
-            // Already on plot — just highlight it
-            highlightTrace(pvName);
-        } else {
-            // Add it
-            addTraceForNewPVs([pvName]);
-            setStatus('Added ' + pvName);
-            setTimeout(function () {
-                refreshActiveStates();
-                setStatus('');
-            }, 600);
-        }
-    }
-
-    function renderList(pvNames) {
-        var list = document.getElementById('pvSidebarList');
-        list.innerHTML = '';
-        if (pvNames.length === 0) {
-            return;
-        }
-        var frag = document.createDocumentFragment();
-        pvNames.forEach(function (pv) {
-            var el = document.createElement('div');
-            el.className = 'pv-item' + (isOnPlot(pv) ? ' active' : '');
-            el.setAttribute('data-pv', pv);
-            el.textContent = pv;
-            el.title = pv;
-            el.addEventListener('click', function () { handlePVClick(pv); });
-            frag.appendChild(el);
-        });
-        list.appendChild(frag);
-    }
-
-    function doSearch(pattern) {
-        if (!pattern || pattern.length < 1) {
-            setStatus('0 results');
-            renderList([]);
-            return;
-        }
-        setStatus('Searching…');
-        fetch(viewerVars.serverURL + '/../bpl/getMatchingPVs?pv=' + encodeURIComponent(pattern))
-            .then(function(r) { return r.json(); })
-            .then(function(pvNames) {
-                setStatus(pvNames.length + ' result' + (pvNames.length === 1 ? '' : 's'));
-                renderList(pvNames);
-            })
-            .catch(function() {
-                setStatus('Search failed');
-                renderList([]);
-            });
-    }
-
-    document.getElementById('pvSidebarSearch').addEventListener('input', function () {
-        clearTimeout(searchTimer);
-        var val = this.value.trim();
-        searchTimer = setTimeout(function () { doSearch(val); }, DEBOUNCE_MS);
-    });
-
-    // Keep active states in sync whenever traces change
-    var _origAdd = window.addTraceForNewPVs;
-    window.addTraceForNewPVs = function (pvNames) {
-        _origAdd(pvNames);
-        setTimeout(function () {
-            refreshActiveStates();
-            renderSelectedList();
-        }, 800);
-    };
-
-    viewerVars.renderSelectedList = renderSelectedList;
-    viewerVars.updateVisibility = updateVisibility;
-
-    // Initial hint
-    setStatus('0 results');
-    renderSelectedList();
-
-
-// implement side bar pin/unpin logic
-document.addEventListener('DOMContentLoaded', function () {
-    var SIDEBAR_WIDTH = 240;
-    var COLLAPSED_WIDTH = 32;
-    var TRANSITION_MS = 260;
-
-    var sidebar = document.getElementById('pvSidebar');
-    var toggle  = document.getElementById('pvSidebarToggle');
-
-    function resizePlot() {
-        var isExpanded = !sidebar.classList.contains('unpinned') || sidebar.classList.contains('hovered');
-        var sidebarW = isExpanded ? SIDEBAR_WIDTH : COLLAPSED_WIDTH;
-        var newWidth = window.innerWidth - sidebarW;
-        if (myDiv && myDiv.layout) {
-            Plotly.relayout(myDiv, { width: newWidth, height: plotAreaHeight() * 0.95 });
-        }
-    }
-
-    toggle.addEventListener('click', function () {
-        sidebar.classList.toggle('unpinned');
-        var unpinned = sidebar.classList.contains('unpinned');
-        if (!unpinned) { sidebar.classList.remove('hovered'); }
-        toggle.title = unpinned ? 'Pin sidebar' : 'Unpin sidebar';
-        setTimeout(resizePlot, TRANSITION_MS);
-    });
-
-    sidebar.addEventListener('mouseenter', function () {
-        if (sidebar.classList.contains('unpinned')) {
-            sidebar.classList.add('hovered');
-            setTimeout(resizePlot, TRANSITION_MS);
-        }
-    });
-
-    sidebar.addEventListener('mouseleave', function () {
-        if (sidebar.classList.contains('unpinned')) {
-            sidebar.classList.remove('hovered');
-            setTimeout(resizePlot, TRANSITION_MS);
-        }
-    });
-
-    window.addEventListener('resize', resizePlot);
-});
-
-
-// implement top bar pin/unpin logic
-document.addEventListener('DOMContentLoaded', function () {
-    var TRANSITION_MS = 260;
-    var bar    = document.getElementById('dateRangeBar');
-    var toggle = document.getElementById('dateRangeBarToggle');
-
-    function resizePlotHeight() {
-        if (myDiv && myDiv.layout) {
-            Plotly.relayout(myDiv, { height: plotAreaHeight() * 0.95 });
-        }
-    }
-
-    toggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        bar.classList.toggle('unpinned');
-        var unpinned = bar.classList.contains('unpinned');
-        if (!unpinned) { bar.classList.remove('hovered'); }
-        toggle.title = unpinned ? 'Pin top bar' : 'Unpin top bar';
-        setTimeout(resizePlotHeight, TRANSITION_MS);
-    });
-
-    bar.addEventListener('mouseenter', function () {
-        if (bar.classList.contains('unpinned')) {
-            bar.classList.add('hovered');
-            setTimeout(resizePlotHeight, TRANSITION_MS);
-        }
-    });
-
-    bar.addEventListener('mouseleave', function () {
-        if (bar.classList.contains('unpinned')) {
-            bar.classList.remove('hovered');
-            setTimeout(resizePlotHeight, TRANSITION_MS);
-        }
-    });
-});
-
-
-// implement chart tool buttons logic
-document.addEventListener('DOMContentLoaded', function () {
-    function setDragMode(mode) {
-        document.getElementById('toolZoom').classList.toggle('active', mode === 'zoom');
-        document.getElementById('toolPan').classList.toggle('active', mode === 'pan');
-        if (myDiv && myDiv.layout) { Plotly.relayout(myDiv, {dragmode: mode}); }
-    }
-
-    document.getElementById('toolZoom').addEventListener('click', function () { setDragMode('zoom'); });
-    document.getElementById('toolPan').addEventListener('click', function () { setDragMode('pan'); });
-
-    document.getElementById('toolZoomIn').addEventListener('click', function () {
-        if (!myDiv || !myDiv.layout) return;
-        var ms0 = viewerVars.start.getTime(), ms1 = viewerVars.end.getTime();
-        var mid = (ms0 + ms1) / 2, half = (ms1 - ms0) / 4;
-        Plotly.relayout(myDiv, {'xaxis.range[0]': mid - half, 'xaxis.range[1]': mid + half});
-    });
-
-    document.getElementById('toolZoomOut').addEventListener('click', function () {
-        if (!myDiv || !myDiv.layout) return;
-        var ms0 = viewerVars.start.getTime(), ms1 = viewerVars.end.getTime();
-        var mid = (ms0 + ms1) / 2, half = (ms1 - ms0);
-        Plotly.relayout(myDiv, {'xaxis.range[0]': mid - half, 'xaxis.range[1]': mid + half});
-    });
-
-    document.getElementById('toolReset').addEventListener('click', function () {
-        if (!myDiv || !myDiv.layout) return;
-        Plotly.relayout(myDiv, {'xaxis.autorange': true});
-    });
-
-    document.getElementById('toolSavePng').addEventListener('click', function () {
-        if (!myDiv) return;
-        Plotly.downloadImage(myDiv, {format: 'png', filename: 'archiver-plot'});
-    });
-});
-
-})();
-
-
-=======
->>>>>>> origin/master
 viewerVars.relativeDateRegex = /^([-+]{0,1})(\d+)([smhdwMQy]{1})$/; // Get these from moment.js Manipulate shorthand.
-
 
 function parseRelativeDate(relDate) {
   var parts = viewerVars.relativeDateRegex.exec(relDate);
@@ -494,44 +128,6 @@ function parseRelativeDate(relDate) {
 
 // parse parameters into the viweerVars object
 function parseURLParameters() {
-<<<<<<< HEAD
-	var queryString = window.location.search;
-	if(typeof queryString !== 'undefined' && queryString && queryString.length > 2) {
-		var queries = queryString.substring(1).split("&");
-		for (var i = 0, l = queries.length; i < l; i++ ) {
-			var parts = queries[i].split('='), name = parts[0], val = decodeURIComponent(parts[1]);
-			switch(name) {
-				case "pv":
-					viewerVars.pvs.push(val);
-					viewerVars.pvData[val] = {};
-					break;
-				case "from":
-					viewerVars.start = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
-					break;
-				case "to":
-					viewerVars.end = viewerVars.relativeDateRegex.test(val) ? parseRelativeDate(val) : new Date(val);
-					break;
-				case "yaxes":
-					viewerVars.egu_yaxis_specs = JSON.parse(decodeURIComponent(val));
-					break;
-				case "binSize":
-					viewerVars.binSize = parseInt(val);
-					viewerVars.userFixedBinSize = true;
-					break;
-				case "replaceNA":
-					viewerVars.replaceNA = val === 'true' ? true : false;
-					break;
-				default:
-					console.log("Unsupported parameter " + name);
-					break;
-			}
-		}
-	}
-	// QueryStart and QueryEnd are what we actually send to the server....
-	determineBinSize();
-	viewerVars.queryStart = viewerVars.start;
-	viewerVars.queryEnd = viewerVars.end;
-=======
   queryString = window.location.search;
   if (
     typeof queryString !== "undefined" &&
@@ -577,7 +173,6 @@ function parseURLParameters() {
   determineBinSize();
   viewerVars.queryStart = viewerVars.start;
   viewerVars.queryEnd = viewerVars.end;
->>>>>>> origin/master
 }
 
 // Figure out the trace index for each PV that has a trace and return a array of traces in that order.
@@ -703,21 +298,6 @@ function determineBinSize() {
 
 // We listen to plotly_relayout events and guess the type of x-axis change based on the presence/absence of elements in the eventdata. Not the most ideal but...
 function processChangesOnXAxis(eventdata) {
-<<<<<<< HEAD
-	console.log( 'Received plotly_relayout event data:' + JSON.stringify(eventdata));
-	var previousStart = viewerVars.start;
-	if (('xaxis.range[0]' in eventdata && 'xaxis.range[1]' in eventdata)
-		|| ('xaxis2.range[0]' in eventdata && 'xaxis2.range[1]' in eventdata)
-	) {
-		if('xaxis.range[0]' in eventdata && 'xaxis.range[1]' in eventdata) {
-			viewerVars.start = moment(eventdata['xaxis.range[0]']).toDate();
-			viewerVars.end = moment(eventdata['xaxis.range[1]']).toDate();
-		} else if('xaxis2.range[0]' in eventdata && 'xaxis2.range[1]' in eventdata) {
-			viewerVars.start = moment(eventdata['xaxis2.range[0]']).toDate();
-			viewerVars.end = moment(eventdata['xaxis2.range[1]']).toDate();
-		}
-		syncDateBar();
-=======
   console.log(
     "Received plotly_relayout event data:" + JSON.stringify(eventdata),
   );
@@ -736,7 +316,6 @@ function processChangesOnXAxis(eventdata) {
       viewerVars.start = moment(eventdata["xaxis2.range[0]"]).toDate();
       viewerVars.end = moment(eventdata["xaxis2.range[1]"]).toDate();
     }
->>>>>>> origin/master
 
     if (viewerVars.currentBinningOperator.startsWith("errorbar")) {
       viewerVars.queryStart = viewerVars.start;
@@ -750,41 +329,6 @@ function processChangesOnXAxis(eventdata) {
     viewerVars.queryEnd = viewerVars.end;
     fetchDataFromServerAndPlot("ReplaceTraces");
 
-<<<<<<< HEAD
-		calculateLiveCount();
-		if(viewerVars.currentButton == "Live") {
-			if(viewerVars.liveModeTimer != null) clearInterval(viewerVars.liveModeTimer);
-			console.log("Kicking off live mode..");
-			let layoutChanges = {'xaxis' : { 'autorange' : false}};
-			layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
-			layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
-			layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-			Plotly.relayout(myDiv, layoutChanges);
-			viewerVars.liveModeTimer = setInterval(liveModeTick, 1*1000);
-		} else {
-			if(viewerVars.liveModeTimer != null) {
-				console.log("Entering static mode..");
-				clearInterval(viewerVars.liveModeTimer);
-				viewerVars.liveModeTimer = null;
-				let buttonIndex = viewerVars.selectorOptions.buttons.findIndex(button => button.label === "Live");
-				viewerVars.selectorOptions.buttons[buttonIndex].step = 'minute';
-				viewerVars.selectorOptions.buttons[buttonIndex].count = 7;
-
-				let layoutChanges = {'xaxis' : { 'autorange' : false}};
-				layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
-				layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
-				layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-				Plotly.relayout(myDiv, layoutChanges);
-			}
-		}
-	} else if ('xaxis.range[0]' in eventdata) {
-		console.log("We compressed the time scale on the left side");
-		viewerVars.start = moment(eventdata['xaxis.range[0]']).toDate();
-		viewerVars.queryStart = viewerVars.start;
-		viewerVars.queryEnd = previousStart;
-		fetchDataFromServerAndPlot("LeftPan");
-	}
-=======
     calculateLiveCount();
     if (viewerVars.currentButton == "Live") {
       if (viewerVars.liveModeTimer != null)
@@ -829,7 +373,6 @@ function processChangesOnXAxis(eventdata) {
     viewerVars.queryEnd = previousStart;
     fetchDataFromServerAndPlot("LeftPan");
   }
->>>>>>> origin/master
 }
 
 // Get the data from the server and add to the plot. This could be considered the main function in some sense.
@@ -839,23 +382,6 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
     return;
   }
 
-<<<<<<< HEAD
-	let pvsToFetchData = (xAxisChangeType == "AddNewTrace") ? newTracePVNames : viewerVars.pvs;
-	var datas = new Array(pvsToFetchData.length);
-	var fetchPromises = pvsToFetchData.map(function(unsafePVName, i) {
-		let pvName = encodeURIComponent(unsafePVName);
-		let queryString = "";
-		if(viewerVars.binSize > 0) {
-			if (viewerVars.currentBinningOperator === "raw") {
-				queryString = "pv="  + pvName;
-			} else {
-				queryString = "pv=" + viewerVars.currentBinningOperator + "_" + viewerVars.binSize + "(" + pvName + ")";
-			}
-		} else {
-			queryString = "pv=" + pvName;
-		}
-		let startEndQs = "&from="+viewerVars.queryStart.toISOString()+"&to="+viewerVars.queryEnd.toISOString();
-=======
   let pvsToFetchData =
     xAxisChangeType == "AddNewTrace" ? newTracePVNames : viewerVars.pvs;
   let pvDataPromises = _.times(pvsToFetchData.length, function () {
@@ -886,7 +412,6 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
       viewerVars.queryStart.toISOString() +
       "&to=" +
       viewerVars.queryEnd.toISOString();
->>>>>>> origin/master
 
     if (viewerVars.binSize > 0) {
       let binnedQueryStart = new Date(
@@ -909,90 +434,6 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
       startEndQs += "&fetchLatestMetadata=true";
     }
 
-<<<<<<< HEAD
-		let pvDataUrl = viewerVars.serverURL + "/getData.qw?" + queryString + startEndQs;
-		console.log(pvDataUrl);
-		return fetch(pvDataUrl)
-			.then(function(r) { return r.json(); })
-			.then(function(d0) {
-				datas[i] = d0;
-				return true;
-			})
-			.catch(function(err) {
-				console.log("Server side failure getting data for " + unsafePVName + "\n" + err);
-				datas[i] = {};
-				return false;
-			});
-	});
-
-	Promise.all(fetchPromises).then(function(results) {
-		for(let i = 0, l = results.length; i < l; i++) {
-			if (!results[i]) {
-				new Noty({
-					type: "error",
-					timeout: 5000,
-					text: "Failure getting data for PV " + pvsToFetchData[i]
-				}).show();
-				continue;
-			}
-			let data = datas[i][0];
-			if(_.isNil(data) || !_.includes(_.keys(data), "meta")) { console.log("Empty dataset for PV at" + i); console.log(data); continue}
-			// arguments[i] is the result of the .getJSON; the data is in [0]. The server sends this as an array hence the additional [0]
-			let pvName = data['meta'].name;
-			console.log("Plotting " + pvName);
-			let egu = data['meta']['EGU'];
-			if(typeof egu == 'undefined' || !egu || egu.length <= 0) { egu = 'N/A'; }
-			if(!('egu' in viewerVars.pvData[pvName])) {
-				viewerVars.pvData[pvName].egu = egu;
-				if (egu in viewerVars.egu2axis) {
-					viewerVars.pvData[pvName].axis = viewerVars.egu2axis[egu];
-				} else {
-					for(j = 0; j < viewerVars.supportedYAxes.length; j++) {
-						if(!(viewerVars.supportedYAxes[j] in viewerVars.axis2egu)) {
-							console.log("Mapping " + egu + " to " + viewerVars.supportedYAxes[j]);
-							viewerVars.egu2axis[egu] = viewerVars.supportedYAxes[j];
-							viewerVars.axis2egu[viewerVars.supportedYAxes[j]] = egu;
-							viewerVars.pvData[pvName].axis = viewerVars.egu2axis[egu];
-							break;
-						}
-					}
-				}
-				if(!('axis' in viewerVars.pvData[pvName])) {
-					new Noty({
-						type: "error",
-						timeout: 5000,
-						text: "Cannot map " + pvName + " to one of the available axes. Not displaying this PV."
-					}).show();
-					continue;
-				}
-			}
-			if('DESC' in data['meta']) {
-				viewerVars.pvData[pvName]['DESC'] = data['meta']['DESC'];
-			}
-
-			if(!('axis' in viewerVars.pvData[pvName])) {
-				continue;
-			}
-			var isWaveform = data['meta']['waveform'];
-			if(isWaveform) { // Escape hatch for waveforms...
-				if(viewerVars.pvs.length > 1) {
-					alert("For now, you can only plot one waveform at a time");
-
-					// remove selected PV from renderSelectedList given that it is not possible to display it
-					var idx = viewerVars.pvs.indexOf(pvName);
-					if(idx >= 0) { viewerVars.pvs.splice(idx, 1); }
-					delete viewerVars.pvData[pvName];
-					if(viewerVars.renderSelectedList) { viewerVars.renderSelectedList(); }
-					return;
-				}
-				return process3DPlot(pvName, data);
-			}
-
-			switch(xAxisChangeType) {
-			case "LeftPan": {
-				let previousDataSetFirstSampleMillis = myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].getTime();
-				console.log(data['data'].length + " samples from the server " + myDiv.data[viewerVars.pvData[pvName].traceIndex].x[0].toString());
-=======
     let pvDataUrl =
       viewerVars.serverURL + "/getData.qw?" + queryString + startEndQs;
     console.log(pvDataUrl);
@@ -1097,7 +538,6 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
                   viewerVars.pvData[pvName].traceIndex
                 ].x[0].toString(),
             );
->>>>>>> origin/master
 
             let secs = data["data"]
               .filter(function (sample) {
@@ -1193,100 +633,6 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
         } // Close the switch
       }
 
-<<<<<<< HEAD
-		if(viewerVars.pvs.length == 1 || !('layout' in myDiv)) { // This means we are creating the plotly object for the first time...
-			var layout = {
-					title: '',
-                    width: window.innerWidth,
-					height: plotAreaHeight(),
-					showlegend: true,
-					legend: {x: 0, y: 1},
-					xaxis: {type: 'date', rangeselector: viewerVars.selectorOptions,
-						autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()],
-						title: getXAxisTitle(),
-						titlefont: {color: '#7f7f7f', }
-					},
-					yaxis: _.assign({title: viewerVars.axis2egu['y1'], exponentformat: 'e'}, getYAxisSpecification(viewerVars.pvs[0]))
-			};
-			var layoutChanges = getLayoutChangesForMultipleYAxes(layout);
-			_.merge(layout, layoutChanges);
-
-			var traces = computeTraceIndices();
-			viewerVars.plotType = viewerVars.plotTypeEnum.SCATTER_2D;
-			var plotConfig = generatePlotConfig();
-			Plotly.newPlot('archViewer', traces, layout, plotConfig).then(function() {
-				myDiv.on('plotly_relayout', processChangesOnXAxis);
-				addToolTipsToTraceLegends();
-				syncDateBar();
-			});
-
-			renderRangeButtons();
-
-
-		} else { // We have already created the plotly object; use add/delete API's
-			var updateXs = [], updateYs = [], updateIndices = [], newTraces = [], newTraceIndices = [];
-			for(i = 0; i < viewerVars.pvs.length; i++) {
-				pvName = viewerVars.pvs[i];
-				// Skip PV's that have not been mapped to an axis
-				if(!('axis' in viewerVars.pvData[pvName])) continue;
-
-				if('update' in viewerVars.pvData[pvName]) {
-					updateXs.push(viewerVars.pvData[pvName].update.x);
-					updateYs.push(viewerVars.pvData[pvName].update.y);
-					updateIndices.push(viewerVars.pvData[pvName].traceIndex);
-				}
-
-				newTraces.push(viewerVars.pvData[pvName].trace);
-				newTraceIndices.push(viewerVars.pvData[pvName].traceIndex);
-			}
-
-			switch(xAxisChangeType) {
-				case "LeftPan":
-					console.log("Left panning " + updateIndices);
-					Plotly.prependTraces(myDiv, {x: updateXs, y: updateYs}, updateIndices);
-					break;
-				case "RightPan":
-					console.log("Right panning " + updateIndices);
-					Plotly.extendTraces(myDiv, {x: updateXs, y: updateYs}, updateIndices);
-					break;
-				case "ReplaceTraces":
-					console.log("Replacing traces " + newTraceIndices);
-					updateXAxisTitle();
-					Plotly.deleteTraces(myDiv, newTraceIndices);
-					Plotly.addTraces(myDiv, newTraces).then(function () {
-						reflectBinSizeColorOnLegend();
-						addToolTipsToTraceLegends();
-					});
-					break;
-				case "AddNewTrace":
-					var traces = computeTraceIndices();
-					for (var j = 0; j < newTracePVNames.length; j++) {
-						pvName = newTracePVNames[j];
-						if (!('trace' in viewerVars.pvData[pvName])) continue;
-						console.log("Checking to see if we need to add axis for " + pvName + " at " + viewerVars.pvData[pvName].traceIndex);
-						// Add the new axis if it does not exist in the layout already.
-						var longAxisName = viewerVars.y_short_2_long[viewerVars.pvData[pvName].axis];
-						if (!(longAxisName in myDiv.layout)) {
-							var layoutChanges = getLayoutChangesForMultipleYAxes(myDiv.layout);
-							Plotly.relayout(myDiv, layoutChanges)
-								.then(Plotly.addTraces(myDiv, viewerVars.pvData[pvName].trace, viewerVars.pvData[pvName].traceIndex))
-								.then(addToolTipsToTraceLegends());
-						} else {
-							Plotly.addTraces(myDiv, viewerVars.pvData[pvName].trace, viewerVars.pvData[pvName].traceIndex)
-								.then(addToolTipsToTraceLegends);
-						}
-					}
-					break;
-				case "NewPlot":
-					alert("Should not be here....");
-					break;
-				default:
-					alert("Should not be here....");
-					break;
-			}
-		}
-	}).catch(function() { console.log("Failed to get data from the server"); });
-=======
       if (!("layout" in myDiv)) {
         // This means we are creating the plotly object for the first time...
         var layout = {
@@ -1427,18 +773,10 @@ function fetchDataFromServerAndPlot(xAxisChangeType, newTracePVNames) {
     .fail(function () {
       console.log("Failed to get data from the server");
     });
->>>>>>> origin/master
 }
 
+// The modebar is specified in the plotConfig. Use icons from font-awesome to create our modebar buttons.
 function generatePlotConfig() {
-<<<<<<< HEAD
-	let bPhone = (window.screen.availHeight > window.screen.availWidth);
-	let plotConfig = {
-		displaylogo: false,
-		displayModeBar: false
-	};
-	return plotConfig;
-=======
   let bPhone = window.screen.availHeight > window.screen.availWidth;
   let newModeBarButtons = [];
   newModeBarButtons.push({
@@ -1527,7 +865,6 @@ function generatePlotConfig() {
       : ["sendDataToCloud"],
   };
   return plotConfig;
->>>>>>> origin/master
 }
 
 // The search modebar buttons will eventually call this function to add a new PV to the plot.
@@ -1557,36 +894,17 @@ function process3DPlot(pvName, data) {
     return;
   }
 
-<<<<<<< HEAD
-	if(viewerVars.currentlyAnimating3DPlot) {
-		viewerVars.currentlyAnimating3DPlot = false;
-		clearInterval(viewerVars.timerIndexFor3DAnimation);
-	}
-=======
   if (viewerVars.currentlyAnimating3DPlot) {
     viewerVars.currentlyAnimating3DPlot = false;
     clearInterval(viewerVars.timerIndexFor3DAnimation);
     // console.log("Stopped existing timer");
   }
->>>>>>> origin/master
 
   viewerVars.currentlyAnimating3DPlot = true;
   viewerVars.timerIndexFor3DAnimation = setInterval(frame, 1000);
   var totalFrames = viewerVars.pvData[pvName].secs.length;
   var currentFrame = 0;
 
-<<<<<<< HEAD
-	function moveToFrame(frameTimeStr) { // Process use clicks on the time plot to move to a particular point.
-		var frameTime = moment(frameTimeStr).toDate();
-		for(i = 0; i < totalFrames; i++) {
-			if(viewerVars.pvData[pvName].secs[i].getTime() == frameTime.getTime()) {
-				currentFrame = i;
-				frame();
-				break;
-			}
-		}
-	}
-=======
   function moveToFrame(frameTimeStr) {
     // Process use clicks on the time plot to move to a particular point.
     var frameTime = moment(frameTimeStr).toDate();
@@ -1599,7 +917,6 @@ function process3DPlot(pvName, data) {
       }
     }
   }
->>>>>>> origin/master
 
   function cancel() {
     viewerVars.currentlyAnimating3DPlot = false;
@@ -1659,30 +976,6 @@ function process3DPlot(pvName, data) {
       marker: { size: 5 },
     };
 
-<<<<<<< HEAD
-		if('layout' in myDiv) { // Plotly object already exists.
-			Plotly.deleteTraces(myDiv, [0,1])
-				.then(function () {
-					Plotly.addTraces(myDiv, [valueTrace, timeTrace]);
-				});
-		} else { // Plotly object does not exist.
-			viewerVars.plotType = viewerVars.plotTypeEnum.ANIMATE_3D;
-			var layout = {
-				height: plotAreaHeight() * 0.95,
-				showlegend: true,
-				legend: {x: 0, y: 1},
-				xaxis: {type: 'linear', autorange: true},
-				yaxis: {autorange: true, domain: [0, 0.8]},
-				xaxis2: {
-					type: 'date',
-					rangeselector: viewerVars.selectorOptions,
-					autorange: false,
-					range: [viewerVars.start.getTime(), viewerVars.end.getTime()],
-					anchor: 'y2'
-				},
-				yaxis2: {autorange: false, range: [0, 10], domain: [0.8, 1.0], anchor: 'x2'},
-			};
-=======
     if ("layout" in myDiv) {
       // Plotly object already exists.
       Plotly.deleteTraces(myDiv, [0, 1]).then(function () {
@@ -1712,7 +1005,6 @@ function process3DPlot(pvName, data) {
           anchor: "x2",
         },
       };
->>>>>>> origin/master
 
       var plotConfig = generatePlotConfig();
       Plotly.newPlot(
@@ -1756,15 +1048,6 @@ function updateXAxisTitle() {
 
 // If the PV has a .DESC, we add that as a tooltip to the PV's legend.
 function addToolTipsToTraceLegends() {
-<<<<<<< HEAD
-	document.querySelectorAll("g.legend g.traces").forEach(function(el) {
-		var pvName = el.querySelector('.legendtext').getAttribute('data-unformatted');
-		var ttipText = _.get(viewerVars.pvData[pvName], 'DESC', '') + "  -  (" + _.get(viewerVars.pvData[pvName], 'egu', 'N/A') + ")";
-		var ttip = document.createElementNS("http://www.w3.org/2000/svg", 'title');
-		ttip.appendChild(document.createTextNode(ttipText));
-		el.appendChild(ttip);
-	});
-=======
   $("g.legend g.traces").each(function () {
     let pvName = $(this).children(".legendtext").attr("data-unformatted");
     let ttipText =
@@ -1776,21 +1059,15 @@ function addToolTipsToTraceLegends() {
     ttip.appendChild(document.createTextNode(ttipText));
     $(this)[0].appendChild(ttip);
   });
->>>>>>> origin/master
 }
 
 // We show fixed bin sizes in a different color; dynamic bin sizes are neutral.
 function reflectBinSizeColorOnLegend() {
-<<<<<<< HEAD
-	var xtitle = document.querySelector(".xtitle");
-	if (xtitle) { xtitle.classList.toggle("fixedBinSize", viewerVars.userFixedBinSize); }
-=======
   if (viewerVars.userFixedBinSize) {
     $(".xtitle").addClass("fixedBinSize");
   } else {
     $(".xtitle").removeClass("fixedBinSize");
   }
->>>>>>> origin/master
 }
 
 // Done with plotly integration.
@@ -1805,188 +1082,6 @@ function liveModeTick() {
   viewerVars.queryStart = viewerVars.start;
   viewerVars.queryEnd = viewerVars.end;
 
-<<<<<<< HEAD
-	let layoutChanges = {'xaxis' : { 'autorange' : false}};
-	layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
-	layoutChanges.xaxis.range = [viewerVars.start.getTime(), viewerVars.end.getTime()];
-	layoutChanges.xaxis.domain = myDiv.layout.xaxis.domain;
-	layoutChanges.xaxis.title = getXAxisTitle();
-	Plotly.relayout(myDiv, layoutChanges);
-
-	fetchDataFromServerAndPlot("ReplaceTraces");
-	syncDateBar();
-}
-
-
-// Labels shown as standalone buttons; everything else (except Live) goes into the dropdown.
-var inlineRangeButtonLabels = ['5m', '1d', '6M'];
-
-
-function renderRangeButtons() {
-    var container = document.getElementById('rangeButtons');
-    if (!container) return;
-    container.innerHTML = '';
-
-    var dropdownButtons = [];
-    var liveButton = null;
-
-    viewerVars.selectorOptions.buttons.forEach(function(btn) {
-        if (btn.stepmode === 'forward') {
-            liveButton = btn;
-        } else if (inlineRangeButtonLabels.indexOf(btn.label) === -1) {
-            dropdownButtons.push(btn);
-        }
-    });
-
-    viewerVars.selectorOptions.buttons.forEach(function(btn) {
-        if (btn.stepmode === 'forward' || inlineRangeButtonLabels.indexOf(btn.label) === -1) return;
-        appendRangeButton(container, btn, false);
-    });
-
-    if (dropdownButtons.length) {
-        container.appendChild(buildRangeDropdown(dropdownButtons));
-    }
-
-    if (liveButton) {
-        var liveControls = document.getElementById('liveControls');
-        var existingLiveBtn = liveControls.querySelector('.range-btn-live');
-        if (existingLiveBtn) liveControls.removeChild(existingLiveBtn);
-        var liveEl = document.createElement('button');
-        liveEl.className = 'range-btn range-btn-live' + (liveButton.label === viewerVars.currentButton ? ' active' : '');
-        liveEl.textContent = liveButton.label;
-        liveEl.title = 'Toggle live PV display on/off';
-        liveEl.addEventListener('click', function() { handleRangeButtonClick(liveButton, liveEl); });
-        liveControls.insertBefore(liveEl, liveControls.firstChild);
-    }
-
-    if(viewerVars.updateVisibility) { viewerVars.updateVisibility(); }
-}
-
-
-function appendRangeButton(container, btn, isLive) {
-    var el = document.createElement('button');
-    el.className = 'range-btn' + (isLive ? ' range-btn-live' : '') + (btn.label === viewerVars.currentButton ? ' active' : '');
-    el.textContent = btn.label;
-    el.title = isLive ? 'Toggle live PV display on/off' : btn.label;
-    el.addEventListener('click', function() { handleRangeButtonClick(btn, el); });
-    container.appendChild(el);
-}
-
-
-function buildRangeDropdown(buttons) {
-    var select = document.createElement('select');
-    select.className = 'range-btn-select';
-    select.title = 'More time ranges';
-
-    var isCurrentInDropdown = buttons.some(function(b) { return b.label === viewerVars.currentButton; });
-
-    var placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = 'More…';
-    placeholder.disabled = true;
-    placeholder.selected = !isCurrentInDropdown;
-    select.appendChild(placeholder);
-
-    buttons.forEach(function(btn) {
-        var opt = document.createElement('option');
-        opt.value = btn.label;
-        opt.textContent = btn.label;
-        if (btn.label === viewerVars.currentButton) opt.selected = true;
-        select.appendChild(opt);
-    });
-
-    select.addEventListener('change', function() {
-        var chosen = buttons.find(function(b) { return b.label === select.value; });
-        if (!chosen) return;
-        handleRangeButtonClick(chosen, select);
-    });
-
-    return select;
-}
-
-
-function handleRangeButtonClick(btn, buttonEl) {
-    if (btn.stepmode === 'forward' && viewerVars.liveModeTimer != null) {
-        clearInterval(viewerVars.liveModeTimer);
-        viewerVars.liveModeTimer = null;
-        buttonEl.classList.remove('active');
-        viewerVars.currentButton = '';
-        hideLiveControls();
-        return;
-    }
-
-    document.querySelectorAll('#rangeButtons .range-btn, #liveControls .range-btn').forEach(function(b) { b.classList.remove('active'); });
-    var dropdown = document.querySelector('#rangeButtons .range-btn-select');
-    if (dropdown && buttonEl !== dropdown) dropdown.value = '';
-    if (buttonEl.classList.contains('range-btn')) buttonEl.classList.add('active');
-    viewerVars.currentButton = btn.label;
-
-    if (btn.stepmode === 'forward') {
-        // Live mode
-        if (viewerVars.liveModeTimer != null) clearInterval(viewerVars.liveModeTimer);
-        var liveCount = calculateLiveCount();
-        var now = new Date();
-        viewerVars.end = now;
-        viewerVars.start = new Date(now.getTime() - liveCount);
-        viewerVars.queryStart = viewerVars.start;
-        viewerVars.queryEnd = viewerVars.end;
-        syncDateBar();
-        if (myDiv.layout) {
-            var lc = { xaxis: { autorange: false, range: [viewerVars.start.getTime(), viewerVars.end.getTime()], domain: myDiv.layout.xaxis.domain } };
-            Plotly.relayout(myDiv, lc);
-        }
-        fetchDataFromServerAndPlot("ReplaceTraces");
-        viewerVars.liveModeTimer = setInterval(liveModeTick, 1000);
-        showLiveControls();
-        return;
-    }
-
-    hideLiveControls();
-    if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
-
-    var end = new Date();
-    var start = (btn.stepmode === 'todate')
-        ? moment().startOf(btn.step).toDate()
-        : moment().subtract(btn.count, btn.step).toDate();
-
-    viewerVars.start = start;
-    viewerVars.end = end;
-    viewerVars.queryStart = start;
-    viewerVars.queryEnd = end;
-    syncDateBar();
-
-    if (!myDiv.layout) return;
-    if (viewerVars.plotType === viewerVars.plotTypeEnum.SCATTER_2D) {
-        Plotly.relayout(myDiv, { xaxis: { autorange: false, range: [start.getTime(), end.getTime()], domain: myDiv.layout.xaxis.domain } });
-    } else {
-        Plotly.relayout(myDiv, { xaxis2: { autorange: false, range: [start.getTime(), end.getTime()], domain: myDiv.layout.xaxis2.domain, anchor: 'y2' } });
-    }
-    fetchDataFromServerAndPlot("ReplaceTraces");
-}
-
-function syncDateBar() {
-    if (viewerVars.start) {
-        document.getElementById('dialog_startTime').value = moment(viewerVars.start).format("YYYY/MM/DD HH:mm:ss");
-    }
-    if (viewerVars.end) {
-        document.getElementById('dialog_endTime').value = moment(viewerVars.end).format("YYYY/MM/DD HH:mm:ss");
-    }
-}
-
-// User selected a start and end time...
-function startAndEndTimeSelected() {
-	if (viewerVars.liveModeTimer != null) { clearInterval(viewerVars.liveModeTimer); viewerVars.liveModeTimer = null; }
-	document.querySelectorAll('#rangeButtons .range-btn, #liveControls .range-btn').forEach(function(b) { b.classList.remove('active'); });
-	var dropdown = document.querySelector('#rangeButtons .range-btn-select');
-	if (dropdown) dropdown.value = '';
-	hideLiveControls();
-	viewerVars.currentButton = '';
-
-	viewerVars.start = moment(document.getElementById('dialog_startTime').value, "YYYY/MM/DD HH:mm:ss").toDate();
-	viewerVars.end   = moment(document.getElementById('dialog_endTime').value, "YYYY/MM/DD HH:mm:ss").toDate();
-	viewerVars.queryStart = viewerVars.start;
-	viewerVars.queryEnd = viewerVars.end;
-=======
   let layoutChanges = { xaxis: { autorange: false } };
   layoutChanges.xaxis.rangeselector = viewerVars.selectorOptions;
   layoutChanges.xaxis.range = [
@@ -2013,7 +1108,6 @@ function startAndEndTimeSelected() {
   ).toDate();
   viewerVars.queryStart = viewerVars.start;
   viewerVars.queryEnd = viewerVars.end;
->>>>>>> origin/master
 
   if (viewerVars.plotType == viewerVars.plotTypeEnum.SCATTER_2D) {
     let currXAxis = myDiv.layout.xaxis;
@@ -2044,48 +1138,6 @@ function startAndEndTimeSelected() {
   fetchDataFromServerAndPlot("ReplaceTraces");
 }
 
-<<<<<<< HEAD
-
-
-function toggleFullscreen() {
-    var el = document.getElementById('appContainer');
-
-    if (!document.fullscreenElement) {
-        // save current sidebar state before collapsing it
-        var _sidebar = document.getElementById('pvSidebar');
-        viewerVars.sidebarWasUnpinned = _sidebar.classList.contains('unpinned');
-        _sidebar.classList.add('unpinned');
-        _sidebar.classList.remove('hovered');
-        el.requestFullscreen()
-            .then(function () {
-                Plotly.relayout(myDiv, {
-                    autosize: true,
-                    height: window.screen.height * 0.95
-                });
-            });
-    } else {
-        document.exitFullscreen()
-            .then(function () {
-                Plotly.relayout(myDiv, {
-                    autosize: true,
-                    height: plotAreaHeight() * 0.95
-                });
-            });
-    }
-}
-
-
-
-function fixBinSize() {
-	let binSize = parseInt(document.getElementById('binSizeInput').value);
-	if(binSize > 0) {
-		viewerVars.userFixedBinSize = true;
-		viewerVars.binSize = binSize;
-		viewerVars.queryStart = viewerVars.start;
-		viewerVars.queryEnd = viewerVars.end;
-		fetchDataFromServerAndPlot("ReplaceTraces");
-	}
-=======
 // User typed a pattern, we search for PV's matching this pattern.
 function searchForPVsMatchingPattern() {
   let pattern = $("#pvNamePattern").val();
@@ -2138,7 +1190,6 @@ function fixBinSize() {
     viewerVars.queryEnd = viewerVars.end;
     fetchDataFromServerAndPlot("ReplaceTraces");
   }
->>>>>>> origin/master
 }
 
 // When you click on a y-axis, toggle between a log/linear scale.
@@ -2159,13 +1210,6 @@ function toggleLinearLogScale(egu) {
 // Use the array of PV names as the column headers
 // Use the time => [array of values] as rows in a table.
 function getCurrentDataAsDict() {
-<<<<<<< HEAD
-	function naArray(len) {
-		var ret = [];
-		for(var i = 0; i < len; i++) { ret.push("N/A"); }
-		return ret;
-	}
-=======
   function naArray(len) {
     var ret = [];
     for (let i in len) {
@@ -2173,7 +1217,6 @@ function getCurrentDataAsDict() {
     }
     return ret;
   }
->>>>>>> origin/master
 
   let tbl = {};
   var names = [];
@@ -2215,8 +1258,6 @@ function getCurrentDataAsDict() {
   }
 }
 
-<<<<<<< HEAD
-=======
 // Popup a modal with the data for the current plot.
 function showChartDataAsText() {
   let d = getCurrentDataAsDict();
@@ -2241,7 +1282,6 @@ function showChartDataAsText() {
   $("#showDataModal").modal("show");
 }
 
->>>>>>> origin/master
 function exportToCSV() {
   let d = getCurrentDataAsDict();
   let names = d[0];
@@ -2282,11 +1322,6 @@ function exportToCSV() {
     });
   }
 
-<<<<<<< HEAD
-	let csvContent = "Timestamp," + names.join(",") + "\n";
-	Object.keys(tbl).forEach(function(key) { csvContent +=  moment(key).format("YYYY/MM/DD HH:mm:ss.SSS,") + tbl[key].join(",") + "\n"; });
-	viewFile("data:text/csv;charset=utf-8," + encodeURIComponent(csvContent));
-=======
   let csvContent = "Timestamp," + names.join(",") + "\n";
   Object.keys(tbl).forEach(function (key) {
     csvContent +=
@@ -2296,7 +1331,6 @@ function exportToCSV() {
   });
   //myWindow = window.open("data:text/csv;charset=utf-8," + encodeURIComponent(csvContent));
   viewFile("data:text/csv;charset=utf-8," + encodeURIComponent(csvContent));
->>>>>>> origin/master
 }
 
 function viewFile(csvContent) {
@@ -2339,47 +1373,11 @@ function getLinkToCurrentView() {
 }
 
 // URL to what we are currently showing...
-<<<<<<< HEAD
-function copyLinkToClipboard() {
-    let linkToCurrentView = getLinkToCurrentView();
-
-	function notifyCopied(success) {
-		new Noty({
-			type: success ? "success" : "error",
-			timeout: success ? 2500: 5000,
-			text: success ? "Link to current view copied to clipboard" : "Failed to copy link to current view to clipboard"
-		}).show();
-	}
-
-	if (navigator.clipboard) {
-		// modern way to copy to clipboard
-		navigator.clipboard.writeText(linkToCurrentView).then(function() {
-			notifyCopied(true);
-		}, function() {
-			notifyCopied(false);
-		});
-	} else {
-		// old way to copy to clipboard (in case modern way is not supported by the client)
-		let textArea = document.createElement("textarea");
-		textArea.value = linkToCurrentView;
-		textArea.style.position = "fixed";
-		textArea.style.opacity = "0";
-		document.body.appendChild(textArea);
-		textArea.select();
-		try {
-			notifyCopied(document.execCommand("copy"));
-		} catch (err) {
-			notifyCopied(false);
-		}
-		document.body.removeChild(textArea);
-	}
-=======
 function showLinkToCurrentView() {
   let linkToCurrentView = getLinkToCurrentView();
   console.log(linkToCurrentView);
   $("#linkText").val(linkToCurrentView);
   $("#linkModal").modal("show");
->>>>>>> origin/master
 }
 
 function showHelp() {
@@ -2413,64 +1411,6 @@ function showElogModal(gd) {
         raw = decodeURIComponent(parts[1]);
       return new Blob([raw], { type: contentType });
     }
-<<<<<<< HEAD
-    gd._snapshotInProgress = true;
-    Plotly.toImage(gd, {'format': 'png'})
-      .then(function(result) {
-          gd._snapshotInProgress = false;
-          viewerVars.currentSnapshot = makeblob(result);
-          console.log("Done generating snapshot and storing in viewervars");
-          document.getElementById('elogComment').value = "";
-          document.getElementById('elogModal').showModal();
-      })
-      .catch(function() {
-          gd._snapshotInProgress = false;
-          viewerVars.currentSnapshot = null;
-          alert("There was a problem creating a snapshot");
-      });}
-
-function postToELog() {
-    if(viewerVars.currentSnapshot == null) { return; }
-    let data = new FormData();
-    data.append("snapshot", viewerVars.currentSnapshot);
-    data.append("comment", document.getElementById('elogComment').value);
-    data.append("link", getLinkToCurrentView());
-    fetch(viewerVars.postToElogURL, { method: 'POST', body: data })
-        .then(function() { console.log("Successfully posted to the elog"); })
-        .catch(function(err) { alert("Error posting to the elog: " + err); })
-        .finally(function() { viewerVars.currentSnapshot = null; });
-}
-
-function showYAxesRangeModal() {
-    let axtmpl = `{{#.}}<tr><td><label>{{egu}}</label></td><td><input type="text" class="form-control" name="{{egu}}_min" value="{{min}}"/></td><td><input type="text" class="form-control" name="{{egu}}_max" value="{{max}}"/></td></tr>{{/.}}`;
-    Mustache.parse(axtmpl);
-    let yranges = _.map(viewerVars.egu2axis, function(v, k) { return {
-        "egu": k,
-        "min": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[0]', -10)),
-        "max": _.get(viewerVars.egu_yaxis_specs, k + ".range", _.get(myDiv._fullLayout, viewerVars.y_short_2_long[v] + '.range[1]',  10))
-    }})
-    document.querySelector("#yAxesModal table tbody").innerHTML = Mustache.render(axtmpl, yranges);
-    document.getElementById('yAxesModal').showModal();
-}
-
-function applyYAxesRanges() {
-    let newlayout = myDiv.layout;
-    _.each(viewerVars.egu2axis, function(v, k) {
-        let range = [parseFloat(document.querySelector('#yAxesModal table tbody input[name="' + k + '_min"]').value), parseFloat(document.querySelector('#yAxesModal table tbody input[name="' + k + '_max"]').value)];
-        _.set(viewerVars.egu_yaxis_specs, k + '.range', range);
-        _.set(newlayout, viewerVars.y_short_2_long[v] + ".autorange", false);
-        _.set(newlayout, viewerVars.y_short_2_long[v] + ".range", range);
-    });
-    fetchDataFromServerAndPlot("ReplaceTraces");
-}
-
-function showRemovePVsModal() {
-    if(viewerVars.pvs.length <= 0) { return; }
-    let rmtmpl = `{{#pvNames}}<div class="checkbox"><label><input type="checkbox" value="{{.}}">{{.}}</label></div>{{/pvNames}}`;
-    Mustache.parse(rmtmpl);
-    document.querySelector("#removePVsModal .checkboxlist").innerHTML = Mustache.render(rmtmpl, { pvNames: viewerVars.pvs });
-    document.getElementById('removePVsModal').showModal();
-=======
     let parts = dataURL.split(BASE64_MARKER),
       contentType = parts[0].split(":")[1],
       raw = window.atob(parts[1]),
@@ -2593,7 +1533,6 @@ function showRemovePVsModal() {
     .empty()
     .append(Mustache.render(rmtmpl, { pvNames: viewerVars.pvs }));
   $("#removePVsModal").modal("show");
->>>>>>> origin/master
 }
 
 function removePVFromPlot(pvName) {
@@ -2607,26 +1546,6 @@ function removePVFromPlot(pvName) {
 }
 
 function removeSelectedPVs() {
-<<<<<<< HEAD
-	document.querySelectorAll("#removePVsModal .checkboxlist input:checked").forEach(function(el) {
-		removePVFromPlot(el.value);
-	});
-}
-
-function showLiveControls() {
-	var buttonIndex = viewerVars.selectorOptions.buttons.findIndex(b => b.label === "Live");
-	var timeInput = document.getElementById('timeInput');
-	var unitInput = document.getElementById('unitInput');
-	timeInput.value = viewerVars.selectorOptions.buttons[buttonIndex].count;
-	unitInput.value = viewerVars.selectorOptions.buttons[buttonIndex].step;
-	timeInput.disabled = false;
-	unitInput.disabled = false;
-}
-
-function hideLiveControls() {
-	document.getElementById('timeInput').disabled = true;
-	document.getElementById('unitInput').disabled = true;
-=======
   $("#removePVsModal")
     .find(".checkboxlist")
     .find("input:checked")
@@ -2680,7 +1599,6 @@ function showAdvancedViewModal() {
     .empty()
     .append(Mustache.render(modal));
   $("#advancedViewModal").modal("show");
->>>>>>> origin/master
 }
 
 function showAdvancedView() {
@@ -2732,96 +1650,6 @@ function calculateLiveCount() {
   return liveButtonCount;
 }
 
-<<<<<<< HEAD
-document.addEventListener('DOMContentLoaded', function() {
-	fetch("fapaths.json")
-		.then(function(r) { return r.json(); })
-		.then(function(icons) { viewerVars.icons = icons; })
-		.catch(function() {})
-		.then(function() {
-			parseURLParameters();
-			if (viewerVars.pvs.length != 0) {
-				if (viewerVars.renderSelectedList) viewerVars.renderSelectedList();
-				fetchDataFromServerAndPlot("NewPlot");
-			}
-		});
-
-	document.addEventListener("paste", function(ev) {
-		var pvName = ev.clipboardData.getData('text/plain').trim();
-		if (typeof pvName !== 'undefined' && pvName && pvName.length > 2) {
-			console.log("Pasting PV from clipboard event " + pvName);
-			addTraceForNewPVs([pvName]);
-		}
-	});
-
-	// implement fullscreen logic
-	document.addEventListener('fullscreenchange', function () {
-		var isFullscreen = !!document.fullscreenElement;
-		var _sidebar = document.getElementById('pvSidebar');
-
-		if (isFullscreen) {
-			_sidebar.classList.add('unpinned');
-			_sidebar.classList.remove('hovered');
-		} else {
-			if (viewerVars.sidebarWasUnpinned) {
-				_sidebar.classList.add('unpinned');
-			} else {
-				_sidebar.classList.remove('unpinned', 'hovered');
-			}
-		}
-
-		Plotly.relayout(myDiv, {
-			autosize: true,
-			height: (isFullscreen ? window.screen.height : plotAreaHeight()) * 0.95
-		});
-	});
-
-	// There is a big SVG drag area over much of the plot; so we do this to determine if the user has clicked on some plot element.
-	document.addEventListener('click', function(e) {
-		for(var shortName in viewerVars.axis2egu) { // Check to see if the user clicked on one of the y-axes
-			var axisObj = document.querySelector("." + viewerVars.y_short_2_axisclass[shortName]);
-			if (!axisObj) continue;
-			var bRect = axisObj.getBoundingClientRect();
-			if(e.pageX >= bRect.left && e.pageX <= bRect.right && e.pageY >= bRect.top && e.pageY <= bRect.bottom) {
-				console.log("Axis " + viewerVars.axis2egu[shortName] + " clicked");
-				toggleLinearLogScale(viewerVars.axis2egu[shortName]);
-				return;
-			}
-		}
-
-		var xaxisDom = document.querySelector(".xtitle");
-		if(xaxisDom) { // Check to see if the user clicked on one of the x-axis components
-			var bRect = xaxisDom.getBoundingClientRect();
-			var leftOffset = bRect.left + window.scrollX, topOffset = bRect.top + window.scrollY;
-			if(e.pageX >= leftOffset && e.pageX <= (leftOffset + bRect.width) && e.pageY >= topOffset && e.pageY <= (topOffset + bRect.height)) {
-				try {
-					var ppl = xaxisDom.children[0].getBBox().x; var bnl = ppl + xaxisDom.children[0].getComputedTextLength();
-				} finally {
-					var ppl = xaxisDom.children[0].getBoundingClientRect().left + window.scrollX; var bnl = ppl + xaxisDom.children[0].getComputedTextLength();
-				}
-				if(e.pageX >= ppl && e.pageX <= bnl) {
-					var nextBinningOperator = viewerVars.binningOperatorsList[((viewerVars.binningOperatorsList.indexOf(viewerVars.currentBinningOperator)+1)%viewerVars.binningOperatorsList.length)];
-					if(nextBinningOperator == "raw" && getEstimatedRawSamples() > 1000000) {
-						console.log("Skip switching into the raw operator as we estimate to have more than 1000000 samples for one of the PV's");
-						nextBinningOperator = viewerVars.binningOperatorsList[((viewerVars.binningOperatorsList.indexOf(nextBinningOperator)+1)%viewerVars.binningOperatorsList.length)];
-					}
-					viewerVars.currentBinningOperator = nextBinningOperator;
-					fetchDataFromServerAndPlot("ReplaceTraces");
-				} else {
-					if(viewerVars.binSize > 0) {
-						if(viewerVars.userFixedBinSize) {
-							viewerVars.userFixedBinSize = false;
-							reflectBinSizeColorOnLegend();
-						} else {
-							document.getElementById('binSizeModal').showModal();
-						}
-					}
-				}
-				return;
-			}
-		}
-	});
-=======
 $(document).ready(function () {
   $.getJSON("lib/fapaths.json").done(function (icons) {
     viewerVars.icons = icons;
@@ -2925,5 +1753,4 @@ $(document).ready(function () {
       }
     }
   });
->>>>>>> origin/master
 });
