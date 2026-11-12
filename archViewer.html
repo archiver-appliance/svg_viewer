@@ -30,6 +30,7 @@
               class="sidebar-search"
               type="text"
               placeholder="Search…"
+              aria-label="Search PVs"
               autocomplete="off"
               spellcheck="false"
             />
@@ -75,6 +76,7 @@
                 autocomplete="off"
                 spellcheck="false"
                 placeholder="YYYY/MM/DD HH:mm:ss"
+                aria-label="Start time"
               />
               <button
                 class="date-range-icon"
@@ -99,6 +101,7 @@
                 autocomplete="off"
                 spellcheck="false"
                 placeholder="YYYY/MM/DD HH:mm:ss"
+                aria-label="End time"
               />
               <button
                 class="date-range-icon"
@@ -122,9 +125,15 @@
                 min="1"
                 value="7"
                 class="live-interval-input"
+                aria-label="Live update interval"
                 disabled
               />
-              <select id="unitInput" class="live-unit-select" disabled>
+              <select
+                id="unitInput"
+                class="live-unit-select"
+                aria-label="Live update interval unit"
+                disabled
+              >
                 <option value="second">second(s)</option>
                 <option value="minute" selected>minute(s)</option>
                 <option value="hour">hour(s)</option>
@@ -273,7 +282,7 @@
                 document
                   .getElementById("timeInput")
                   .addEventListener("blur", function () {
-                    if (!this.value || parseInt(this.value) < 1) this.value = 1;
+                    if (!this.value || Number.parseInt(this.value) < 1) this.value = 1;
                     showAdvancedView();
                   });
                 document
@@ -281,7 +290,7 @@
                   .addEventListener("keydown", function (e) {
                     if (e.keyCode == 13) {
                       e.preventDefault();
-                      if (!this.value || parseInt(this.value) < 1)
+                      if (!this.value || Number.parseInt(this.value) < 1)
                         this.value = 1;
                       showAdvancedView();
                     }

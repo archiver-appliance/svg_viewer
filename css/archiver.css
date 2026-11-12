@@ -1,9 +1,4 @@
 /* ── From archViewer.html ──────────────────────────────────────────── */
-#archViewer {
-  width: 100%;
-  height: 100%;
-}
-
 text.fixedBinSize tspan:nth-child(2) {
   fill: orange;
 }
@@ -39,8 +34,10 @@ dialog .modal-dialog {
   margin: 0;
 }
 
-dialog[open] {
-  animation: dialog-in 0.15s ease;
+@media (prefers-reduced-motion: no-preference) {
+  dialog[open] {
+    animation: dialog-in 0.15s ease;
+  }
 }
 
 @keyframes dialog-in {
@@ -248,12 +245,12 @@ dialog[open] {
 
 #pvSidebar .pv-item:hover {
   background: #0094ca20;
-  color: #017daa;
+  color: #015f82;
   border-left-color: #3a4049;
 }
 
 #pvSidebar .pv-item.active {
-  color: #017daa;
+  color: #015f82;
   border-left-color: #017daa;
   background: #0094ca20;
 }
@@ -308,7 +305,7 @@ dialog[open] {
 
 #pvSelectedList .pv-item:hover {
   background: #0094ca20;
-  color: #017daa;
+  color: #015f82;
   border-left-color: #3a4049;
 }
 
@@ -358,7 +355,7 @@ dialog[open] {
 
 .sidebar-selected-actions .sidebar-action-btn:hover {
   background: #252b33;
-  color: #017daa;
+  color: #4fc8f2;
   border-color: #3a4049;
 }
 
@@ -374,7 +371,7 @@ dialog[open] {
 
 .sidebar-selected-actions .sidebar-action-btn-danger:hover {
   background: #2a1200;
-  color: #017daa;
+  color: #4fc8f2;
   border-color: #017daa;
 }
 
@@ -388,6 +385,8 @@ dialog[open] {
 }
 
 #archViewer {
+  width: 100%;
+  height: 100%;
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -594,12 +593,12 @@ dialog[open] {
 
 .action-btn:hover {
   background: #252b33;
-  color: #017daa;
+  color: #4fc8f2;
   border-color: #3a4049;
 }
 
 .action-btn.active {
-  background: #0094ca;
+  background: #0077a3;
   color: #ffffff;
   border-color: #017daa;
 }
@@ -626,13 +625,13 @@ dialog[open] {
 #rangeButtons .range-btn:hover,
 #liveControls .range-btn:hover {
   background: #252b33;
-  color: #017daa;
+  color: #4fc8f2;
   border-color: #3a4049;
 }
 
 #rangeButtons .range-btn.active,
 #liveControls .range-btn.active {
-  background: #0094ca;
+  background: #0077a3;
   color: #ffffff;
   border-color: #017daa;
 }
@@ -658,7 +657,7 @@ dialog[open] {
 
 #rangeButtons .range-btn-select:hover {
   background: #252b33;
-  color: #017daa;
+  color: #4fc8f2;
   border-color: #3a4049;
 }
 
