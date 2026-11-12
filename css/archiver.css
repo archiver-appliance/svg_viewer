@@ -1,0 +1,678 @@
+/* ── From archViewer.html ──────────────────────────────────────────── */
+text.fixedBinSize tspan:nth-child(2) {
+  fill: orange;
+}
+
+/* ── Page shell ──────────────────────────────────────────── */
+body {
+  display: flex;
+  margin: 0;
+  overflow: hidden;
+}
+
+#appContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Native dialogs ──────────────────────────────────────────── */
+dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: 90vw;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+dialog .modal-dialog {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  dialog[open] {
+    animation: dialog-in 0.15s ease;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── PV Sidebar ──────────────────────────────────────────── */
+#pvSidebar {
+  width: 250px;
+  min-width: 250px;
+  align-self: stretch;
+  background: #f5f6f8;
+  border-right: 1px solid #e1e4ea;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  z-index: 100;
+  transition:
+    width 0.25s ease,
+    min-width 0.25s ease;
+  overflow: hidden;
+}
+
+#pvSidebar.unpinned {
+  width: 32px;
+  min-width: 32px;
+}
+
+#pvSidebar.unpinned.hovered {
+  width: 240px;
+  min-width: 240px;
+}
+
+/* Toggle button */
+#pvSidebarToggle {
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+#pvSidebarToggle:hover {
+  background: #31667d;
+}
+
+#pvSidebarToggle svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.25s ease;
+}
+
+/* When unpinned rotate the pin icon 45° to signal it is loose */
+#pvSidebar.unpinned #pvSidebarToggle svg {
+  transform: rotate(45deg);
+}
+
+/* When unpinned and not hovered, hide title+search and center the toggle */
+#pvSidebar.unpinned:not(.hovered) .sidebar-title,
+#pvSidebar.unpinned:not(.hovered) .sidebar-search {
+  display: none;
+}
+
+#pvSidebar.unpinned:not(.hovered) .sidebar-header {
+  position: relative;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 42px;
+}
+
+#pvSidebar.unpinned:not(.hovered) #pvSidebarToggle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+
+/* Hide content when unpinned and not hovered */
+#pvSidebar.unpinned:not(.hovered) .sidebar-title,
+#pvSidebar.unpinned:not(.hovered) .sidebar-search,
+#pvSidebar.unpinned:not(.hovered) .sidebar-status,
+#pvSidebar.unpinned:not(.hovered) .sidebar-list,
+#pvSidebar.unpinned:not(.hovered) .sidebar-divider,
+#pvSidebar.unpinned:not(.hovered) .sidebar-section-header,
+#pvSidebar.unpinned:not(.hovered) .sidebar-selected-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+#pvSidebar .sidebar-title,
+#pvSidebar .sidebar-search,
+#pvSidebar .sidebar-status,
+#pvSidebar .sidebar-list,
+#pvSidebar .sidebar-divider,
+#pvSidebar .sidebar-section-header,
+#pvSidebar .sidebar-selected-actions {
+  opacity: 1;
+  transition: opacity 0.2s ease 0.1s; /* slight delay so it fades in after expand */
+}
+
+#pvSidebar .sidebar-header {
+  padding: 8px 8px 8px 12px;
+  border-bottom: 1px solid #e1e4ea;
+  background: #31667d;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+#pvSidebar .sidebar-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#pvSidebar .sidebar-search {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  background: #0094ca20;
+  border: 1px solid #017daa;
+  border-radius: 3px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#pvSidebar .sidebar-search:focus {
+  border-color: #e1e4ea;
+}
+
+#pvSidebar .sidebar-search::placeholder {
+  color: #ffffff;
+  opacity: 0.35;
+}
+
+#pvSidebar .sidebar-status {
+  font-size: 9px;
+  color: #454d57;
+  padding: 5px 12px 0;
+  min-height: 18px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+#pvSidebar .sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+#pvSidebar .sidebar-list::-webkit-scrollbar {
+  width: 4px;
+}
+#pvSidebar .sidebar-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+#pvSidebar .sidebar-list::-webkit-scrollbar-thumb {
+  background: #e1e4ea;
+  border-radius: 2px;
+}
+
+#pvSidebar .pv-item {
+  padding: 5px 12px;
+  font-size: 10.5px;
+  color: #293035;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 2px solid transparent;
+  transition:
+    color 0.1s,
+    background 0.1s,
+    border-color 0.1s;
+  line-height: 1.5;
+}
+
+#pvSidebar .pv-item:hover {
+  background: #0094ca20;
+  color: #015f82;
+  border-left-color: #3a4049;
+}
+
+#pvSidebar .pv-item.active {
+  color: #015f82;
+  border-left-color: #017daa;
+  background: #0094ca20;
+}
+
+#pvSidebar .pv-item.active:hover {
+  background: #0094ca45;
+}
+
+/* Divider between search results and selected PVs */
+#pvSidebar .sidebar-divider {
+  height: 1px;
+  background: #e1e4ea;
+  flex-shrink: 0;
+}
+
+#pvSidebar .sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 6px 12px 4px;
+  background: #31667d;
+  flex-shrink: 0;
+}
+
+#pvSidebar .sidebar-section-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+#pvSidebar .sidebar-section-count {
+  font-size: 9px;
+  color: #ffffff;
+}
+
+/* Selected PV list */
+#pvSelectedList {
+  flex: 0 0 auto;
+  max-height: 200px;
+}
+
+#pvSelectedList .pv-item {
+  display: flex;
+  align-items: center;
+  color: #293035;
+  border-left-color: #3a4049;
+}
+
+#pvSelectedList .pv-item:hover {
+  background: #0094ca20;
+  color: #015f82;
+  border-left-color: #3a4049;
+}
+
+#pvSelectedList .pv-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#pvSelectedList .pv-checkbox {
+  flex-shrink: 0;
+  margin: 0 0 0 8px;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  accent-color: #017daa;
+}
+
+/* Selected PV action buttons */
+.sidebar-selected-actions {
+  display: flex;
+  gap: 4px;
+  padding: 5px 8px 7px;
+  flex-shrink: 0;
+  background: #f5f6f8;
+  border-top: 1px solid #e1e4ea;
+}
+
+.sidebar-selected-actions .sidebar-action-btn {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #e1e4ea;
+  border-radius: 3px;
+  color: #293035;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 2px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.sidebar-selected-actions .sidebar-action-btn:hover {
+  background: #252b33;
+  color: #4fc8f2;
+  border-color: #3a4049;
+}
+
+.sidebar-selected-actions .sidebar-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.sidebar-selected-actions .sidebar-action-btn-danger {
+  color: #293035;
+  border-color: #e1e4ea;
+}
+
+.sidebar-selected-actions .sidebar-action-btn-danger:hover {
+  background: #2a1200;
+  color: #4fc8f2;
+  border-color: #017daa;
+}
+
+/* ── Main panel ──────────────────────────────────────────── */
+#mainPanel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#archViewer {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Date range bar ──────────────────────────────────────────── */
+#dateRangeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #31667d;
+  border-bottom: 1px solid #e1e4ea;
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  white-space: nowrap;
+  max-height: 200px;
+  transition:
+    max-height 0.22s ease,
+    padding 0.22s ease;
+}
+
+#dateRangeBar.unpinned:not(.hovered) {
+  max-height: 20px;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Hide content when collapsed; pin button stays interactive via sticky */
+#dateRangeBar.unpinned:not(.hovered) > *:not(#dateRangeBarToggle) {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* Rotate the pin icon when unpinned */
+#dateRangeBar.unpinned #dateRangeBarToggle svg {
+  transform: rotate(45deg);
+}
+
+#dateRangeBarToggle {
+  flex-shrink: 0;
+  margin-left: auto;
+  position: sticky;
+  right: 0;
+  background: #31667d;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+#dateRangeBarToggle:hover {
+  background: #0094ca20;
+}
+
+#dateRangeBarToggle svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.22s ease;
+}
+
+.date-range-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.date-range-input {
+  background: #0094ca20;
+  border: 1px solid #017daa;
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 11px;
+  padding: 4px 8px;
+  outline: none;
+  width: 145px;
+  transition: border-color 0.15s;
+  height: auto;
+}
+
+.date-range-input:focus {
+  border-color: #e1e4ea;
+}
+
+.date-range-picker-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.date-range-picker-wrap .date-range-input {
+  padding-right: 26px;
+}
+
+.date-range-icon {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: #ffffff;
+  padding: 2px 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.date-range-icon:hover {
+  background: #0094ca20;
+}
+
+.date-range-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.date-picker-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  border: none;
+  padding: 0;
+}
+
+#liveControls input,
+#liveControls select {
+  background: #0094ca20;
+  border: 1px solid #017daa;
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  outline: none;
+  flex-shrink: 0;
+}
+
+#liveControls input:focus,
+#liveControls select:focus {
+  border-color: #e1e4ea;
+}
+
+#timeInput {
+  width: 65px;
+}
+
+/* ── Toolbar button groups ──────────────────────────────────────────── */
+#rangeButtons,
+#chartTools,
+#actionButtons {
+  display: flex;
+  gap: 2px;
+  padding-left: 10px;
+  border-left: 1px solid #e1e4ea;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  background: #0094ca20;
+  border: 1px solid #017daa;
+  border-radius: 3px;
+  color: #ffffff;
+  padding: 4px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.action-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.action-btn:hover {
+  background: #252b33;
+  color: #4fc8f2;
+  border-color: #3a4049;
+}
+
+.action-btn.active {
+  background: #0077a3;
+  color: #ffffff;
+  border-color: #017daa;
+}
+
+#rangeButtons .range-btn,
+#liveControls .range-btn {
+  background: #0094ca20;
+  border: 1px solid #017daa;
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#rangeButtons .range-btn:hover,
+#liveControls .range-btn:hover {
+  background: #252b33;
+  color: #4fc8f2;
+  border-color: #3a4049;
+}
+
+#rangeButtons .range-btn.active,
+#liveControls .range-btn.active {
+  background: #0077a3;
+  color: #ffffff;
+  border-color: #017daa;
+}
+
+#rangeButtons .range-btn-select {
+  background: #0094ca20;
+  border: 1px solid #017daa;
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  outline: none;
+}
+
+#rangeButtons .range-btn-select:hover {
+  background: #252b33;
+  color: #4fc8f2;
+  border-color: #3a4049;
+}
+
+#rangeButtons .range-btn-select:focus {
+  border-color: #e1e4ea;
+}
+
+.action-btn:disabled,
+#rangeButtons .range-btn:disabled,
+#liveControls .range-btn:disabled,
+#rangeButtons .range-btn-select:disabled,
+.date-range-input:disabled,
+.date-range-icon:disabled,
+#liveControls input:disabled,
+#liveControls select:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
