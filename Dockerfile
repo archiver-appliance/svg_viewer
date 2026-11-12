@@ -1,14 +1,26 @@
+FROM node:20-slim AS deps
+
+WORKDIR /build
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
 
 FROM python:3.12-slim
 
-
 WORKDIR /app
 
-COPY lib/ ./lib/
+COPY --from=deps /build/node_modules/ ./node_modules/
+
+COPY css/ ./css/
 
 COPY archViewer.html .
 
 COPY archViewer.js .
+
+COPY fapaths.json .
+
+COPY icons/ ./icons/
 
 COPY viewerProxy.py .
 
