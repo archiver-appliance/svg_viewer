@@ -282,7 +282,8 @@
                 document
                   .getElementById("timeInput")
                   .addEventListener("blur", function () {
-                    if (!this.value || Number.parseInt(this.value) < 1) this.value = 1;
+                    if (!this.value || Number.parseInt(this.value) < 1)
+                      this.value = 1;
                     showAdvancedView();
                   });
                 document
