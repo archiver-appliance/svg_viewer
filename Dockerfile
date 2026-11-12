@@ -3,7 +3,7 @@ FROM node:20-slim AS deps
 WORKDIR /build
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 
 FROM python:3.12-slim
