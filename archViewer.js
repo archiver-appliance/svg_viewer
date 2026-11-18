@@ -1679,19 +1679,28 @@ function toggleFullscreen() {
     viewerVars.sidebarWasUnpinned = _sidebar.classList.contains("unpinned");
     _sidebar.classList.add("unpinned");
     _sidebar.classList.remove("hovered");
-    el.requestFullscreen().then(function () {
-      Plotly.relayout(myDiv, {
-        autosize: true,
-        height: window.screen.height * 0.95,
+    el.requestFullscreen()
+      .then(function () {
+        Plotly.relayout(myDiv, {
+          autosize: true,
+          height: window.screen.height * 0.95,
+        });
+      })
+      .catch(function (err) {
+        console.error("Failed to enter fullscreen:", err);
       });
-    });
   } else {
-    document.exitFullscreen().then(function () {
-      Plotly.relayout(myDiv, {
-        autosize: true,
-        height: plotAreaHeight() * 0.95,
+    document
+      .exitFullscreen()
+      .then(function () {
+        Plotly.relayout(myDiv, {
+          autosize: true,
+          height: plotAreaHeight() * 0.95,
+        });
+      })
+      .catch(function (err) {
+        console.error("Failed to exit fullscreen:", err);
       });
-    });
   }
 }
 
@@ -1775,7 +1784,11 @@ function getCurrentDataAsDict() {
 function exportToCSV() {
   let d = getCurrentDataAsDict();
   let names = d[0];
-  let tbl = Object.fromEntries(Object.entries(d[1]).sort());
+  let tbl = Object.fromEntries(
+    Object.entries(d[1]).sort(function (a, b) {
+      return a[0].localeCompare(b[0]);
+    }),
+  );
   if (viewerVars.replaceNA) {
     let memoTbl = Array.from(tbl[Object.keys(tbl)[0]]);
     let firstTbl = Array.from(tbl[Object.keys(tbl)[0]]);
@@ -2142,6 +2155,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (viewerVars.renderSelectedList) viewerVars.renderSelectedList();
         fetchDataFromServerAndPlot("NewPlot");
       }
+    })
+    .catch(function (err) {
+      console.error("Failed to initialize viewer:", err);
     });
 
   document.addEventListener("paste", function (ev) {
