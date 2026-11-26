@@ -17,8 +17,8 @@ python viewerProxy.py 7878 http://archiver-appliance:17668/retrieval
 ## 2. nginx.conf
 This is a configuration file for [NGINX](https://nginx.org/) that enables reverse proxying from the SVG Viewer to a remote Archiver Appliance instance. Before running NGINX, update the following placeholders in the configuration file as needed:
 
-- ```<listening_port>``` with the port on which NGINX listens for incoming requests (e.g. ```listen 9999;```)
-- ```<host_name>``` and ```<host_port>``` with the host name and port of the (remote) Archiver Appliance instance (e.g. ```proxy_pass http://archiver-appliance:17668/retrieval;```)
+- ```<LISTENING_PORT>``` with the port on which NGINX listens for incoming requests (e.g. ```listen 9999;```)
+- ```<ARCHIVER_DATA_RETRIEVAL_URL>``` and ```<HOST_PORT>``` with the host name URL and port of the (remote) Archiver Appliance instance (e.g. ```proxy_pass http://archiver-appliance:17668/retrieval;```)
 
 To start NGINX with this configuration, open a terminal and execute:
 ```
