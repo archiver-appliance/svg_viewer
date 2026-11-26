@@ -46,11 +46,32 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
       - name: Build release archive
         run: |
-          zip -r "svg-viewer-${GITHUB_REF_NAME}.zip" archViewer.html archViewer.js viewerProxy.py lib/ README.md
+          files=(archViewer.html archViewer.js fapaths.json viewerProxy.py css/ icons/ node_modules/ README.md)
+          for f in "${files[@]}"; do
+            if [[ ! -e "$f" ]]; then
+              echo "::error::'$f' is missing; update the release archive file list"
+              exit 1
+            fi
+          done
+          zip -r "svg-viewer-${GITHUB_REF_NAME}.zip" "${files[@]}"
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" --generate-notes "svg-viewer-${GITHUB_REF_NAME}.zip"
+          zip_file="svg-viewer-${GITHUB_REF_NAME}.zip"
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            # Release already created (e.g. from the GitHub UI): attach the archive
+            gh release upload "${GITHUB_REF_NAME}" "${zip_file}" --clobber
+          else
+            prerelease=()
+            # A "-" before any "+build" metadata marks a semver pre-release
+            version="${GITHUB_REF_NAME%%+*}"
+            if [[ "${version}" == *-* ]]; then
+              prerelease=(--prerelease)
+            fi
+            gh release create "${GITHUB_REF_NAME}" --generate-notes "${prerelease[@]}" "${zip_file}"
+          fi
